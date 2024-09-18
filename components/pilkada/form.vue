@@ -65,9 +65,7 @@ const toast = useToast();
 const { state, schema, levelOptions, handleSubmit } = useLocalForm();
 const { isOpen, handleConfirmation } = useLocalModal();
 
-const isEdit = computed(
-  () => props.uid !== "undefined" || props.uid !== "null"
-);
+const isEdit = computed(() => props.uid !== undefined);
 
 onMounted(() => {
   if (props.uid) {

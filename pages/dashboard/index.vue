@@ -1,5 +1,3 @@
 <script setup>
-const { push } = useRouter();
-
-onMounted(() => push("/dashboard/pilkada"));
+onMounted(() => navigateTo("/dashboard/pilkada"));
 </script>
