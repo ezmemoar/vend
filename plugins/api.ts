@@ -19,8 +19,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   const api = $fetch.create({
     baseURL: runtimeConf.public.apiUrl,
     onRequest({ request, options, error }) {
-
-      console.log(request);
       // if (session.value) {
       //   const headers = (options.headers ||= {});
       //   if (Array.isArray(headers)) {

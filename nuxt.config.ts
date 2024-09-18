@@ -18,6 +18,7 @@ export default defineNuxtConfig({
     },
   },
   ui: {
+    safelistColors: ["green", "red", "amber", "blue", "primary", "secondary"],
     icons: {
       dynamic: true,
     },
@@ -36,7 +37,34 @@ export default defineNuxtConfig({
       theme: {
         extend: {
           colors: {
-            main: colors.blue,
+            main: {
+              DEFAULT: "#4857E4",
+              50: "#C0C5F6",
+              100: "#B3B9F4",
+              200: "#98A0F0",
+              300: "#7D88EC",
+              400: "#636FE8",
+              500: "#4857E4",
+              600: "#2436DF",
+              700: "#1C2CBE",
+              800: "#17249B",
+              900: "#121B77",
+              950: "#0F1765",
+            },
+            secondary: {
+              DEFAULT: "#7F56D9",
+              50: "#D4C6F2",
+              100: "#CBBAEF",
+              200: "#B8A1EA",
+              300: "#A588E4",
+              400: "#926FDF",
+              500: "#7F56D9",
+              600: "#6635D2",
+              700: "#5429B5",
+              800: "#452193",
+              900: "#351A72",
+              950: "#2E1661",
+            },
             success: colors.green,
             danger: colors.red,
             warning: colors.amber,
