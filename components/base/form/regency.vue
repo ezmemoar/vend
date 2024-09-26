@@ -15,7 +15,7 @@
 defineProps({
   name: {
     type: String,
-    default: "city",
+    default: "regency",
   },
   label: {
     type: String,

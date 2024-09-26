@@ -1,3 +1,7 @@
-<script setup lang="ts"></script>
+<template>
+  <TpsForm :uid="route.params.uid" />
+</template>
 
-<template></template>
+<script setup>
+const route = useRoute();
+</script>

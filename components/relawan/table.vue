@@ -4,16 +4,19 @@
       <slot name="extra-button" />
     </template>
 
-    <template #relawan_name-data="{ row }">
-      <BaseText class="font-semibold">{{ row.relawan_name }}</BaseText>
-      <BaseText class="text-gray-600">{{ row.relawan_email }}</BaseText>
+    <template #relawan-data="{ row }">
+      <BaseText class="font-semibold">{{ row.relawan }}</BaseText>
+      <BaseText class="text-gray-600">{{ row.email }}</BaseText>
+    </template>
+    <template #address-data="{ row }">
+      <div class="w-80 truncate">{{ row.address }}</div>
     </template>
     <template #penugasan-data="{ row }">
-      <UButton color="white" label="Lihat" />
+      <RelawanPenugasanPreview v-bind="row" />
     </template>
     <template #action-data="{ row }">
       <UButton
-        :to="`/dashboard/relawan/${row.uid}/edit`"
+        :to="createLink(row.uid)"
         variant="ghost"
         color="slate"
         icon="i-heroicons-pencil"
@@ -25,6 +28,7 @@
 <script setup>
 const props = defineProps({
   label: String,
+  redirectAfterEdit: String,
   // type: relawan, pilkada
   listType: {
     type: String,
@@ -37,20 +41,30 @@ const columns = ref([]);
 const data = ref([
   {
     uid: "1",
-    relawan_name: "Rudi Tabuti",
-    relawan_email: "rudi@gmail.com",
+    relawan: "Rudi Tabuti",
+    email: "rudi@gmail.com",
     cellphone: "+62829802939283",
-    address: "Depok, Pondok",
+    address:
+      "Depok, Pondok Tirta Jaya Blok Biasa Depok, Pondok Tirta Jaya Blok Biasa Depok, Pondok Tirta Jaya Blok Biasa Depok, Pondok Tirta Jaya Blok Biasa",
     tps_number: "001",
+    province: "Jawa Barat",
     city: "Depok",
-    subregency: "Cilodong",
-    penugasan: 'Belum Ditugaskan',
+    regency: "Cilodong",
+    subregency: "Sukmajaya",
+    penugasan: "Belum Ditugaskan",
   },
 ]);
 
+const createLink = (uid) => {
+  let text = `/dashboard/relawan/${uid}/edit`;
+  if (props.redirectAfterEdit) text += `?redirect=${props.redirectAfterEdit}`;
+
+  return text;
+};
+
 onMounted(() => {
   columns.value.push({ label: "No", key: "no" });
-  columns.value.push({ label: "Nama Relawan", key: "relawan_name" });
+  columns.value.push({ label: "Nama Relawan", key: "relawan" });
   columns.value.push({ label: "No HP", key: "cellphone" });
   columns.value.push({ label: "Alamat Lengkap", key: "address" });
 

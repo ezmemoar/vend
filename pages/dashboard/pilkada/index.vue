@@ -16,9 +16,12 @@
       </div>
     </div>
 
-    <BaseTablePagination label="List Update PILKADA" :data :columns>
-      <template #data-data="{ row }">
-        <BaseText>{{ row.data }}</BaseText>
+    <BaseTablePagination label="List Update PILKADA" :data="data?.data" :columns>
+      <template #election_type-data="{ row }">{{ row.election_type.value }}</template>
+      <template #province-data="{ row }">{{ row.province.name }}</template>
+      <template #regency-data="{ row }">{{ row.regency.name }}</template>
+      <template #tps_submitted-data="{ row }">
+        <BaseText>{{ row.tps_submitted }}</BaseText>
         <BaseText>{{ row.percentage }}%</BaseText>
       </template>
       <template #action-data="{ row }">
@@ -57,6 +60,8 @@
 </template>
 
 <script setup>
+import { getPilkada } from '~/services/pilkadaService';
+
 const toast = useToast();
 
 const isOpen = ref(false);
@@ -72,7 +77,7 @@ const columns = [
   },
   {
     label: "Level PILKADA",
-    key: "level",
+    key: "election_type",
   },
   {
     label: "Provinsi",
@@ -80,11 +85,11 @@ const columns = [
   },
   {
     label: "Kabupaten / Kota",
-    key: "city",
+    key: "regency",
   },
   {
     label: "Data Masuk",
-    key: "data",
+    key: "tps_submitted",
   },
   {
     label: "Action",
@@ -92,17 +97,8 @@ const columns = [
   },
 ];
 
-const data = [
-  {
-    uid: "1",
-    name: "Pilkada Gubernur dan Wakil Gubernur Jawa Barat",
-    level: "Gubernur",
-    province: "Jawa Barat",
-    city: "-",
-    data: "175 / 1250 TPS",
-    percentage: "30",
-  },
-];
+const { data, status, error, refresh } = getPilkada();
+refresh();
 
 const handleRedirect = () => {
   // isOpen.value = true;

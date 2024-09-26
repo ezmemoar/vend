@@ -15,7 +15,7 @@
 defineProps({
   name: {
     type: String,
-    default: "city",
+    default: "tps_number",
   },
   label: {
     type: String,

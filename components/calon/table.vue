@@ -1,5 +1,9 @@
 <template>
   <BaseTablePagination :label :data :columns>
+    <template #extra-button>
+      <slot name="extra-button" />
+    </template>
+
     <template #created_at-data="{ row }">
       {{ formatDate(row.created_at, true) }}
     </template>
@@ -14,7 +18,7 @@
     </template>
     <template #action-data="{ row }">
       <UButton
-        :to="`/dashboard/calon/${row.uid}/edit`"
+        :to="createLink(row.uid)"
         variant="ghost"
         color="slate"
         icon="i-heroicons-pencil"
@@ -26,6 +30,7 @@
 <script setup>
 const props = defineProps({
   label: String,
+  redirectAfterEdit: String,
   // type: calon, pilkada
   listType: {
     type: String,
@@ -47,6 +52,13 @@ const data = ref([
     real_result: 43,
   },
 ]);
+
+const createLink = (uid) => {
+  let text = `/dashboard/calon/${uid}/edit`;
+  if (props.redirectAfterEdit) text += `?redirect=${props.redirectAfterEdit}`;
+
+  return text;
+};
 
 onMounted(() => {
   columns.value.push({ label: "Date Created", key: "created_at" });

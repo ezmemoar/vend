@@ -3,14 +3,22 @@ const createHeadersPayload = (headers: HeadersInit, val: any) => {
 
   keys.forEach((v) => {
     if (Array.isArray(headers)) {
-      headers.push([v, `Bearer ${val[v]}`]);
+      headers.push([v, val[v]]);
     } else if (headers instanceof Headers) {
-      headers.set(v, `Bearer ${val[v]}`);
+      headers.set(v, val[v]);
     } else {
-      headers[v] = `Bearer ${val[v]}`;
+      headers[v] = val[v];
     }
-  })
+  });
+};
 
+const handleBodyData = (options: any, headers: any) => {
+  if (options.body) {
+    let contentType = headers["content-type"] || headers["Content-Type"];
+
+    if (contentType === "application/x-www-form-urlencoded")
+      options.body = new URLSearchParams(options.body);
+  }
 };
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -18,21 +26,17 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const api = $fetch.create({
     baseURL: runtimeConf.public.apiUrl,
-    onRequest({ request, options, error }) {
-      // if (session.value) {
-      //   const headers = (options.headers ||= {});
-      //   if (Array.isArray(headers)) {
-      //     headers.push(["Authorization", `Bearer ${session.value?.token}`]);
-      //   } else if (headers instanceof Headers) {
-      //     headers.set("Authorization", `Bearer ${session.value?.token}`);
-      //   } else {
-      //     headers.Authorization = `Bearer ${session.value?.token}`;
-      //   }
-      // }
+    onRequest: ({ request, options, error }) => {
+      const headers: any = (options.headers ||= {});
+      const headersVal: any = {};
+
+      createHeadersPayload(headers, headersVal);
+
+      handleBodyData(options, headers);
     },
-    async onResponseError({ response }) {
+    onResponseError: async ({ response }) => {
       if (response.status === 401) {
-        await nuxtApp.runWithContext(() => navigateTo("/login"));
+        // await nuxtApp.runWithContext(() => navigateTo("/login"));
       }
     },
   });

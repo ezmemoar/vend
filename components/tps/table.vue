@@ -1,16 +1,12 @@
 <template>
   <BaseTablePagination :label :data :columns>
-    <template #extra-button>
-      <slot name="extra-button" />
-    </template>
-
-    <template #relawan_name-data="{ row }">
-      <BaseText class="font-semibold">{{ row.relawan_name }}</BaseText>
-      <BaseText class="text-gray-600">{{ row.relawan_email }}</BaseText>
+    <template #relawan-data="{ row }">
+      <BaseText class="font-semibold">{{ row.relawan }}</BaseText>
+      <BaseText class="text-gray-600">{{ row.email }}</BaseText>
     </template>
     <template #action-data="{ row }">
       <UButton
-        :to="`/dashboard/tps/${row.uid}/edit`"
+        :to="createLink(row.uid)"
         variant="ghost"
         color="slate"
         icon="i-heroicons-pencil"
@@ -22,6 +18,7 @@
 <script setup>
 const props = defineProps({
   label: String,
+  redirectAfterEdit: String,
 });
 
 const columns = ref([]);
@@ -34,10 +31,17 @@ const data = ref([
     regency: "Cicangheu",
     subregency: "Cilodong",
     tps_number: "001",
-    relawan_name: "Sekartaji Anisa P",
-    relawan_email: "sekar120@gmail.com",
+    relawan: "Sekartaji Anisa P",
+    email: "sekar120@gmail.com",
   },
 ]);
+
+const createLink = (uid) => {
+  let text = `/dashboard/tps/${uid}/edit`;
+  if (props.redirectAfterEdit) text += `?redirect=${props.redirectAfterEdit}`;
+
+  return text;
+};
 
 onMounted(() => {
   columns.value.push({ label: "No", key: "no" });
@@ -46,7 +50,7 @@ onMounted(() => {
   columns.value.push({ label: "Kecamatan", key: "regency" });
   columns.value.push({ label: "Kelurahan", key: "subregency" });
   columns.value.push({ label: "Nomor TPS", key: "tps_number" });
-  columns.value.push({ label: "Nama Relawan", key: "relawan_name" });
+  columns.value.push({ label: "Nama Relawan", key: "relawan" });
   columns.value.push({ label: "Action", key: "action" });
 });
 </script>

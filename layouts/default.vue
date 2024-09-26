@@ -10,7 +10,7 @@
       <!-- ===== Main Content Start ===== -->
       <div class="pl-5">
         <main
-          class="bg-white mt-5 pt-10 px-10 max-sm:rounded-tr-3xl rounded-tl-3xl w-full h-screen"
+          class="bg-white mt-5 py-10 px-10 max-sm:rounded-tr-3xl rounded-tl-3xl w-full min-h-screen"
         >
           <div>
             <NuxtPage />

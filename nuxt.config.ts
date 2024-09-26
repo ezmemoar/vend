@@ -15,6 +15,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiUrl: "",
+      clientId: "",
+      clientSecret: "",
     },
   },
   ui: {
@@ -39,11 +41,11 @@ export default defineNuxtConfig({
           colors: {
             main: {
               DEFAULT: "#4857E4",
-              50: "#C0C5F6",
-              100: "#B3B9F4",
-              200: "#98A0F0",
-              300: "#7D88EC",
-              400: "#636FE8",
+              50: "#E8EAFC",
+              100: "#D6DAF9",
+              200: "#B3B9F4",
+              300: "#8F98EE",
+              400: "#6C78E9",
               500: "#4857E4",
               600: "#2436DF",
               700: "#1C2CBE",

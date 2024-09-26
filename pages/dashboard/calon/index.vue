@@ -8,6 +8,11 @@
           icon="i-heroicons-arrows-up-down-solid"
           label="Import to Excel"
         />
+        <UButton
+          to="/dashboard/calon/create"
+          icon="i-heroicons-plus"
+          label="Tambah Data"
+        />
       </div>
     </div>
 

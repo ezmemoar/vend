@@ -21,9 +21,9 @@
         <BaseListTile title="Relawan">
           <template #subtitle>
             <BaseText>
-              {{ detailData.relawan_name }} ({{ detailData.relawan_phone }})
+              {{ detailData.relawan }} ({{ detailData.cellphone }})
             </BaseText>
-            <BaseText>{{ detailData.relawan_email }}</BaseText>
+            <BaseText>{{ detailData.email }}</BaseText>
           </template>
         </BaseListTile>
         <BaseListTile
@@ -46,7 +46,7 @@
       <div class="flex w-[80%]">
         <BaseText class="basis-1/6">Lembar Saksi</BaseText>
         <UFormGroup class="basis-5/6" name="name">
-          <UInput v-model="state.name" />
+          <BaseFormUpload v-model="state.lembar_saksi" />
         </UFormGroup>
       </div>
 
@@ -86,11 +86,13 @@ const { isOpen, handleConfirmation } = useLocalModal();
 const detailData = {
   pilkada: "Pilkada Gubernur dan Wakil Gubernur Jawa Barat",
   tps_number: "001",
+  province: "Jawa Barat",
   city: "Depok",
-  subregency: "Sangiang Jaya",
-  relawan_name: "Putera Negara",
-  relawan_phone: "087883534389",
-  relawan_email: "puteranegara@gmail.com",
+  regency: "Cilodong",
+  subregency: "Sukmajaya",
+  relawan: "Putera Negara",
+  cellphone: "087883534389",
+  email: "puteranegara@gmail.com",
   uploaded_at: new Date(),
 };
 

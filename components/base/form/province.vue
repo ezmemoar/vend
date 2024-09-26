@@ -4,7 +4,7 @@
       v-model="model"
       :options="options || []"
       :loading="status === 'pending'"
-      :disabled="status === 'pending'"
+      :disabled="status === 'pending' || disabled"
       option-attribute="name"
       value-attribute="url"
     />
@@ -19,7 +19,11 @@ defineProps({
   },
   label: {
     type: String,
-    default: "Provinsi",
+    default: "",
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
 });
 

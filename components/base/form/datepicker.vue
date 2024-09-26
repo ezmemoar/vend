@@ -36,10 +36,11 @@ const value = computed(() => {
 <template>
   <UPopover :popper="{ placement: 'bottom-start' }">
     <UInput
-      placeholder="Select date"
+      placeholder="Pilih tanggal"
       :value
       readonly
       icon="i-heroicons-calendar-days-20-solid"
+      :class="$attrs.class"
     />
 
     <template #panel="{ close }">

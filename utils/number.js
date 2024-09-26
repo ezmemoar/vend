@@ -10,4 +10,7 @@ export const formatCompactedNumber = (num) =>
     notation: "compact",
   }).format(num);
 
-export const formatNumber = (num) => Intl.NumberFormat("id-ID").format(num);
+export const formatNumber = (num, withComma = false) =>
+  Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: withComma ? 2 : 0,
+  }).format(num);
