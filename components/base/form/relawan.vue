@@ -1,21 +1,26 @@
 <template>
   <UFormGroup :label :name>
-    <USelect
+    <USelectMenu
+      searchable
+      searchable-placeholder="Cari relawan..."
+      placeholder="Pilih relawan"
       v-model="model"
       :options="options || []"
       :loading="status === 'pending'"
       :disabled="status === 'pending' || disabled"
       option-attribute="name"
-      value-attribute="url"
+      value-attribute="uid"
     />
   </UFormGroup>
 </template>
 
 <script setup>
+import { getRelawans } from '~/services/relawanService';
+
 defineProps({
   name: {
     type: String,
-    default: "tps_number",
+    default: "number",
   },
   label: {
     type: String,
@@ -29,7 +34,9 @@ defineProps({
 
 const model = defineModel();
 
-const { data: options, status } = await useApi("pokemon", {
-  transform: (val) => val.results,
+const { query, fetcher } = getRelawans();
+query.value.size = 9999;
+const { data: options, status } = await useAsyncData(fetcher, {
+  transform: (v) => v.data,
 });
 </script>

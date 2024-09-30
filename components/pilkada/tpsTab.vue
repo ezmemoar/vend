@@ -1,5 +1,9 @@
 <template>
-  <TpsTable label="Data TPS" :redirect-after-edit="redirect" />
+  <TpsTable
+    :uid="route.params.uid"
+    label="Data TPS"
+    :redirect-after-edit="redirect"
+  />
 </template>
 
 <script setup>

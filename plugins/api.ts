@@ -12,6 +12,15 @@ const createHeadersPayload = (headers: HeadersInit, val: any) => {
   });
 };
 
+const handleAuthorizationData = (headers: any) => {
+  const authStore = useAuthStore();
+  const authorization = headers?.Authorization || headers?.authorization;
+
+  if (authStore.user.access_token && !authorization) {
+    headers.Authorization = `Bearer ${authStore.user.access_token}`;
+  }
+};
+
 const handleBodyData = (options: any, headers: any) => {
   if (options.body) {
     let contentType = headers["content-type"] || headers["Content-Type"];
@@ -30,13 +39,22 @@ export default defineNuxtPlugin((nuxtApp) => {
       const headers: any = (options.headers ||= {});
       const headersVal: any = {};
 
+      handleAuthorizationData(headers);
       createHeadersPayload(headers, headersVal);
 
       handleBodyData(options, headers);
     },
     onResponseError: async ({ response }) => {
+      const toast = useToast();
+      if (response._data?.message) {
+        toast.add({
+          title: response._data?.message,
+          icon: "i-heroicons-x-mark",
+          color: "danger",
+        });
+      }
       if (response.status === 401) {
-        // await nuxtApp.runWithContext(() => navigateTo("/login"));
+        // await nuxtApp.runWithContext(() => navigateTo("/"));
       }
     },
   });

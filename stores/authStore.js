@@ -1,17 +1,17 @@
 export const useAuthStore = defineStore("auth", () => {
   const user = useLocalStorage("auth", {
-    access_token: "",
-    expired_at: "",
-    expires_in: "",
-    token_type: "",
-    scope: "",
-    refresh_token: "",
-    user_type: "",
+    access_token: null,
+    expired_at: null,
+    expires_in: null,
+    token_type: null,
+    scope: null,
+    refresh_token: null,
+    user_type: null,
 
-    name: "",
-    tps: "",
-    village: "",
-    elections: "",
+    name: null,
+    tps: null,
+    village: null,
+    elections: null,
   });
 
   const setUser = (payload) => {

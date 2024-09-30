@@ -1,13 +1,25 @@
 <template>
   <div class="flex flex-col gap-7">
-    <UForm :state :schema class="space-y-7" @submit="handleConfirmation">
+    <UForm :state :schema class="space-y-7" @submit="openMutateModal">
       <div class="flex justify-between w-full">
         <BaseText el="h1" type="title">
           {{ isEdit ? "Edit" : "Tambah" }} Data Forum
         </BaseText>
         <div class="flex items-center gap-3">
+          <UButton
+            v-if="isEdit"
+            @click="opendeleteModal"
+            color="danger"
+            label="Hapus Data"
+            variant="soft"
+          />
           <UButton to="/dashboard/forum" color="white" label="Cancel" />
-          <UButton type="submit" :label="isEdit ? 'Update' : 'Save'" />
+          <UButton
+            type="submit"
+            :label="isEdit ? 'Update' : 'Save'"
+            :disabled="status === 'pending'"
+            :loading="status === 'pending'"
+          />
         </div>
       </div>
 
@@ -39,13 +51,13 @@
           </BaseText>
           <UFormGroup
             class="basis-full md:basis-4/5 2xl:basis-5/6"
-            name="sentimen"
+            name="status"
           >
             <URadioGroup
               class="basis-5/6"
               :ui="{ fieldset: 'flex items-center flex-row gap-10' }"
-              v-model="state.sentimen"
-              :options="sentimenOptions"
+              v-model="state.status"
+              :options="statusOptions"
             />
           </UFormGroup>
         </div>
@@ -54,15 +66,12 @@
           <BaseText class="basis-full md:basis-1/5 2xl:basis-1/6">
             Sumber Media
           </BaseText>
-          <UFormGroup
-            class="basis-full md:basis-4/5 2xl:basis-5/6"
-            name="source"
-          >
+          <UFormGroup class="basis-full md:basis-4/5 2xl:basis-5/6" name="type">
             <URadioGroup
               class="basis-5/6"
               :ui="{ fieldset: 'flex items-center flex-row gap-10' }"
-              v-model="state.source"
-              :options="sourceOptions"
+              v-model="state.type"
+              :options="typeOptions"
             />
           </UFormGroup>
         </div>
@@ -74,12 +83,12 @@
             Link Sumber
           </BaseText>
           <div class="basis-full md:basis-4/5 2xl:basis-5/6 space-y-7">
-            <UFormGroup label="Gambar" name="source_img">
-              <BaseFormUpload v-model="state.source_img" class="w-full" />
+            <UFormGroup label="Gambar" name="image">
+              <BaseFormUpload v-model="state.image" class="w-full" />
             </UFormGroup>
-            <UFormGroup label="Link" name="source_link">
+            <UFormGroup label="Link" name="url">
               <UInput
-                v-model="state.source_link"
+                v-model="state.url"
                 class="w-full"
                 icon="material-symbols:link"
               />
@@ -106,10 +115,10 @@
             Cara Menanggapi
           </BaseText>
           <UFormGroup
-            name="solve"
+            name="response"
             class="basis-full md:basis-4/5 2xl:basis-5/6"
           >
-            <UTextarea v-model="state.solve" class="w-full" />
+            <UTextarea v-model="state.response" class="w-full" />
           </UFormGroup>
         </div>
       </div>
@@ -117,17 +126,53 @@
       <UDivider />
 
       <div class="flex justify-end items-center gap-3">
+        <UButton
+          v-if="isEdit"
+          @click="opendeleteModal"
+          color="danger"
+          label="Hapus Data"
+          variant="soft"
+        />
         <UButton to="/dashboard/forum" color="white" label="Cancel" />
-        <UButton type="submit" :label="isEdit ? 'Update' : 'Save'" />
+        <UButton
+          type="submit"
+          :label="isEdit ? 'Update' : 'Save'"
+          :disabled="status === 'pending'"
+          :loading="status === 'pending'"
+        />
       </div>
     </UForm>
 
-    <BaseModalConfirmation v-model="isOpen" @confirm="handleSubmit" />
+    <BaseModalConfirmation
+      v-model="isMutateOpen"
+      :loading="mutateStatus === 'pending'"
+      @confirm="handleSubmit"
+    >
+      <template #description>
+        Apakah anda yakin untuk {{ isEdit ? "update" : "menambah" }} data ini?
+      </template>
+    </BaseModalConfirmation>
+
+    <BaseModalConfirmation
+      v-model="isdeleteOpen"
+      :loading="deleteStatus === 'pending'"
+      @confirm="handleDelete"
+    >
+      <template #accept-text>Ya, Hapus</template>
+      <template #description>
+        Apakah anda yakin ingin menghapus data ini?
+      </template>
+    </BaseModalConfirmation>
   </div>
 </template>
 
 <script setup>
-import { object, string } from "yup";
+import {
+  deleteForum,
+  getForum,
+  postForum,
+  updateForum,
+} from "~/services/forumService";
 
 const props = defineProps({
   uid: {
@@ -136,69 +181,95 @@ const props = defineProps({
   },
 });
 
-const route = useRoute();
-const toast = useToast();
-const { state, schema, sentimenOptions, sourceOptions, handleSubmit } =
-  useLocalForm();
-const { isOpen, handleConfirmation } = useLocalModal();
-
 const isEdit = computed(() => props.uid !== undefined);
 
-onMounted(() => {
-  if (props.uid) {
-    // todo update data from database
-    // state.value = res;
+const route = useRoute();
+const toast = useToast();
+
+const { params, fetcher } = getForum();
+const { data, status, execute } = useAsyncData(fetcher, {
+  immediate: false,
+  transform: (v) => v.data,
+});
+
+const {
+  state,
+  schema,
+  fetcher: fetchMutateForum,
+} = isEdit.value ? updateForum() : postForum();
+const {
+  status: mutateStatus,
+  execute: executeMutate,
+  error: mutateError,
+} = useAsyncData(fetchMutateForum, {
+  immediate: false,
+});
+
+const { params: deleteParams, fetcher: fetchDeleteForum } = deleteForum();
+const {
+  status: deleteStatus,
+  execute: executeDelete,
+  error: deleteError,
+} = useAsyncData(fetchDeleteForum, {
+  immediate: false,
+});
+
+const { statusOptions, typeOptions, handleSubmit, handleDelete } =
+  useLocalForm();
+const { isMutateOpen, openMutateModal, isdeleteOpen, opendeleteModal } =
+  useLocalModal();
+
+onMounted(async () => {
+  if (isEdit.value) {
+    params.value.uid = props.uid;
+    await execute();
+    state.value = {
+      uid: data.value.uid,
+      title: data.value.title,
+      date: new Date(data.value.date),
+      type: data.value.type,
+      url: data.value.url,
+      image: data.value.image,
+      status: data.value.status,
+      content: data.value.content,
+      response: data.value.response,
+    };
   }
 });
 
 function useLocalForm() {
-  const state = ref({
-    title: null,
-    date: null,
-    sentimen: null,
-    source: null,
-    source_img: null,
-    source_link: null,
-    content: null,
-    solve: null,
-  });
-
-  const schema = object({
-    title: string().required("Judul berita harus diisi"),
-    date: string().required("Tanggal berita harus diisi"),
-    sentimen: string().required("Sentimen berita harus diisi"),
-    source: string().required("Sumber media harus diisi"),
-    // source_img: string().required("Gambar sumber harus diisi"),
-    source_link: string().required("Link sumber harus diisi"),
-    content: string().required("Isi berita harus diisi"),
-    solve: string().required("Cara menanggapi harus diisi"),
-  });
-
-  const sentimenOptions = [
+  const statusOptions = [
     {
       label: "Positif",
-      value: "positif",
+      value: "Positif",
     },
     {
       label: "Negatif",
-      value: "negatif",
+      value: "Negatif",
+    },
+    {
+      label: "Netral",
+      value: "Netral",
     },
   ];
 
-  const sourceOptions = [
+  const typeOptions = [
     {
       label: "Offline",
-      value: "offline",
+      value: "Offline",
     },
     {
       label: "Online",
-      value: "online",
+      value: "Online",
     },
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    await executeMutate();
+    if (mutateError.value) return;
+
     toast.add({
-      title: `Data berhasil ${isEdit ? "diedit" : "ditambahkan"}`,
+      title: `Data berhasil ${isEdit.value ? "diedit" : "ditambahkan"}`,
       icon: "i-heroicons-check-circle",
       color: "success",
     });
@@ -206,12 +277,29 @@ function useLocalForm() {
     navigateTo(route.query.redirect ?? "/dashboard/forum");
   };
 
-  return { state, schema, sentimenOptions, sourceOptions, handleSubmit };
+  const handleDelete = async () => {
+    deleteParams.value.uid = props.uid;
+    await executeDelete();
+    if (deleteError.value) return;
+
+    toast.add({
+      title: `Data berhasil dihapus`,
+      icon: "i-heroicons-check-circle",
+      color: "success",
+    });
+
+    navigateTo(route.query.redirect ?? "/dashboard/forum");
+  };
+
+  return { statusOptions, typeOptions, handleSubmit, handleDelete };
 }
 
 function useLocalModal() {
-  const isOpen = ref(false);
-  const handleConfirmation = () => (isOpen.value = true);
-  return { isOpen, handleConfirmation };
+  const isMutateOpen = ref(false);
+  const openMutateModal = () => (isMutateOpen.value = true);
+
+  const isdeleteOpen = ref(false);
+  const opendeleteModal = () => (isdeleteOpen.value = true);
+  return { isMutateOpen, openMutateModal, isdeleteOpen, opendeleteModal };
 }
 </script>

@@ -76,48 +76,39 @@
 </template>
 
 <script setup>
-import { object } from "yup";
+import {
+  getPilkadaResult,
+  updatePilkadaResult,
+} from "~/services/pilkadaService";
 
 const route = useRoute();
 const toast = useToast();
-const { state, schema, statusOptions, handleSubmit } = useLocalForm();
+
+const { params, fetcher } = getPilkadaResult();
+params.value.uid = route.params.uid;
+params.value.resultUid = route.params.resultUid;
+const { data, status, execute } = useAsyncData(fetcher, {
+  immediate: false,
+  transform: (v) => v.data,
+});
+
+const {
+  state,
+  schema,
+  fetcher: fetchMutatePilkadaResult,
+} = updatePilkadaResult();
+const {
+  status: mutateStatus,
+  execute: executeMutate,
+  error: mutateError,
+} = useAsyncData(fetchMutatePilkada, {
+  immediate: false,
+});
+
+const { statusOptions, handleSubmit } = useLocalForm();
 const { isOpen, handleConfirmation } = useLocalModal();
 
-const detailData = {
-  pilkada: "Pilkada Gubernur dan Wakil Gubernur Jawa Barat",
-  tps_number: "001",
-  province: "Jawa Barat",
-  city: "Depok",
-  regency: "Cilodong",
-  subregency: "Sukmajaya",
-  relawan: "Putera Negara",
-  cellphone: "087883534389",
-  email: "puteranegara@gmail.com",
-  uploaded_at: new Date(),
-};
-
 function useLocalForm() {
-  const state = ref({
-    tps: [
-      {
-        name: "Imam - Riri",
-        value: null,
-      },
-      {
-        name: "Supian Suri - Anis",
-        value: null,
-      },
-    ],
-    lembar_saksi: null,
-    status: null,
-  });
-
-  const schema = object({
-    tps: null,
-    lembar_saksi: null,
-    status: null,
-  });
-
   const statusOptions = [
     {
       label: "Menunggu Verifikasi",
@@ -142,7 +133,7 @@ function useLocalForm() {
     navigateTo(`/dashboard/pilkada/${route.params.uid}`);
   };
 
-  return { state, schema, statusOptions, handleSubmit };
+  return { statusOptions, handleSubmit };
 }
 function useLocalModal() {
   const isOpen = ref(false);

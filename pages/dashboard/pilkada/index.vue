@@ -16,13 +16,20 @@
       </div>
     </div>
 
-    <BaseTablePagination label="List Update PILKADA" :data="data?.data" :columns>
-      <template #election_type-data="{ row }">{{ row.election_type.value }}</template>
+    <BaseTablePagination
+      label="List Update PILKADA"
+      :data="data?.data"
+      :columns
+      :loading="status === 'pending' || status === 'idle'"
+    >
+      <template #election_type-data="{ row }">
+        {{ row.election_type.value }}
+      </template>
       <template #province-data="{ row }">{{ row.province.name }}</template>
-      <template #regency-data="{ row }">{{ row.regency.name }}</template>
+      <template #regency-data="{ row }">{{ row.regency?.name || '-' }}</template>
       <template #tps_submitted-data="{ row }">
-        <BaseText>{{ row.tps_submitted }}</BaseText>
-        <BaseText>{{ row.percentage }}%</BaseText>
+        <BaseText>{{ row.tps_submitted }} / {{ row.tps_total }} TPS</BaseText>
+        <BaseText>{{ row.submitted_percentage }}%</BaseText>
       </template>
       <template #action-data="{ row }">
         <div class="flex items-center gap-2">
@@ -60,11 +67,11 @@
 </template>
 
 <script setup>
-import { getPilkada } from '~/services/pilkadaService';
+import { getPilkadas } from "~/services/pilkadaService";
 
 const toast = useToast();
-
-const isOpen = ref(false);
+const { query, fetcher } = getPilkadas();
+const { data, status } = useAsyncData("pilkada", fetcher);
 
 const columns = [
   {
@@ -97,11 +104,10 @@ const columns = [
   },
 ];
 
-const { data, status, error, refresh } = getPilkada();
-refresh();
-
 const handleRedirect = () => {
   // isOpen.value = true;
   navigateTo("/dashboard/pilkada/create");
 };
+
+const isOpen = ref(false);
 </script>

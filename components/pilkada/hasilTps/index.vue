@@ -1,13 +1,31 @@
 <template>
-  <BaseTablePagination label="Hasil Pemilihan TPS" :data :columns>
-    <template #date_uploaded-data="{ row }">
-      {{ formatDate(row.date_uploaded, true) }}
+  <BaseTablePagination
+    label="Hasil Pemilihan TPS"
+    :data="data?.data"
+    :columns
+    :loading="status === 'pending' || status === 'idle'"
+  >
+    <template #tps-data="{ row }">
+      {{ formatTrailingNumber(row.tps.number) }}
+    </template>
+    <template #regency-data="{ row }">
+      {{ row.regency.name }}
+    </template>
+    <template #village-data="{ row }">
+      {{ row.village.name }}
+    </template>
+    <template #created_at-data="{ row }">
+      {{ formatDate(row.created_at, true) }}
     </template>
     <template #status-data="{ row }">
-      <BaseStatusBadge :label="row.status_name" :type="setStatus(row.status)" variant="soft" />
+      <BaseStatusBadge
+        :label="row.status.name"
+        :type="setStatus(row.status.id)"
+        variant="soft"
+      />
     </template>
-    <template #pemilihan-data="{ row }">
-      <PilkadaHasilTpsPersentasePemilihan :uid="row.uid" />
+    <template #lembar_saksi-data="{ row }">
+      <PilkadaHasilTpsPersentasePemilihan :result-uid="row.uid" />
     </template>
     <template #action-data="{ row }">
       <UButton
@@ -21,22 +39,30 @@
 </template>
 
 <script setup>
+import { getPilkadaResults } from "~/services/pilkadaService";
+
+const route = useRoute();
+
+const { params, fetcher } = getPilkadaResults();
+params.value.uid = route.params.uid;
+const { data, status } = useAsyncData(fetcher);
+
 const columns = [
   {
     label: "Nomor TPS",
-    key: "no_tps",
+    key: "tps",
   },
   {
     label: "Kabupaten / Kota",
-    key: "city",
+    key: "regency",
   },
   {
     label: "Kelurahan",
-    key: "urban",
+    key: "village",
   },
   {
     label: "Date Uploaded",
-    key: "date_uploaded",
+    key: "created_at",
   },
   {
     label: "Status",
@@ -44,26 +70,13 @@ const columns = [
   },
   {
     label: "Persentase Pemilihan & Lembar Saksi",
-    key: "pemilihan",
+    key: "lembar_saksi",
   },
   {
     label: "Action",
     key: "action",
   },
 ];
-const data = ref([
-  {
-    uid: "1",
-    no_tps: "001",
-    city: "Depok",
-    urban: "Sangiang Jaya",
-    date_uploaded: new Date(),
-    status: 2,
-    status_name: "Laporan Selesai",
-    pemilihan: "https://google.com",
-  },
-]);
 
-const setStatus = (val) =>
-  ["warning", "success", "danger"].find((v, i) => i === val - 1);
+const setStatus = (val) => ({ 1: "warning", 2: "success", 3: "danger" }[val]);
 </script>

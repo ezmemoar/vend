@@ -51,15 +51,19 @@ definePageMeta({
 
 const authStore = useAuthStore();
 
-const { state, schema, data, status, refresh } = postLogin();
-const {
-  data: profileData,
-  status: profileStatus,
-  refresh: fetchProfile,
-} = getProfile({}, true);
+const { state, schema, fetcher } = postLogin();
+const { data, status, execute } = useAsyncData(fetcher, {
+  immediate: false,
+});
+
+// const {
+//   data: profileData,
+//   status: profileStatus,
+//   refresh: fetchProfile,
+// } = getProfile({}, true);
 
 const handleSubmit = async () => {
-  await refresh();
+  await execute();
   authStore.setUser(data.value.data);
 
   // await fetchProfile();

@@ -1,26 +1,27 @@
 <template>
-  <BaseTablePagination :label :data :columns>
+  <BaseTablePagination
+    :label
+    :data="data?.data"
+    :columns
+    :loading="status === 'pending' || status === 'idle'"
+  >
     <template #extra-button>
       <slot name="extra-button" />
     </template>
 
-    <template #source_link-data="{ row }">
-      <UButton
-        variant="link"
-        label="Link"
-        @click="openWindow(row.source_link)"
-      />
+    <template #url-data="{ row }">
+      <UButton variant="link" label="Link" @click="openWindow(row.url)" />
     </template>
 
     <template #content-data="{ row }">
-      <ForumContentPreview v-bind="row" />
+      <ForumContentPreview :uid="row.uid" />
     </template>
 
-    <template #sentimen-data="{ row }">
+    <template #status-data="{ row }">
       <BaseStatusBadge
         variant="soft"
-        :label="row.sentimen"
-        :type="setStatusColor(row.sentimen)"
+        :label="row.status"
+        :type="setStatusColor(row.status)"
       />
     </template>
 
@@ -36,26 +37,22 @@
 </template>
 
 <script setup>
+import { getForums } from "~/services/forumService";
+
 const props = defineProps({
   label: String,
   redirectAfterEdit: String,
+  uid: {
+    type: String,
+    required: false,
+  },
 });
 
-const columns = ref([]);
+const { query, fetcher } = getForums();
+if (props.uid) query.value.election_uid = props.uid;
+const { data, status } = useAsyncData("forum", fetcher);
 
-const data = ref([
-  {
-    uid: "1",
-    title: "Perbaikan Puskesmas Dan Penambahan Alkes Meningkat 20%",
-    date: new Date(),
-    sentimen: "positif",
-    source: "Online",
-    source_img: "Online",
-    source_link: "Online",
-    content: `Mi tincidunt elit, id quisque ligula ac diam, amet. Vel etiam suspendisse morbi eleifend faucibus eget vestibulum felis. Dictum quis montes, sit sit. Tellus aliquam enim urna, etiam. Mauris posuere vulputate arcu amet, vitae nisi, tellus tincidunt. At feugiat sapien varius id. Eget quis mi enim, leo lacinia pharetra, semper. Eget in volutpat mollis at volutpat lectus velit, sed auctor. Porttitor fames arcu quis fusce augue enim. Quis at habitant diam at. Suscipit tristique risus, at donec. In turpis vel et quam imperdiet. Ipsum molestie aliquet sodales id est ac volutpat. `,
-    solve: `Mi tincidunt elit, id quisque ligula ac diam, amet. Vel etiam suspendisse morbi eleifend faucibus eget vestibulum felis. Dictum quis montes, sit sit. Tellus aliquam enim urna, etiam. Mauris posuere vulputate arcu amet, vitae nisi, tellus tincidunt. At feugiat sapien varius id. Eget quis mi enim, leo lacinia pharetra, semper. Eget in volutpat mollis at volutpat lectus velit, sed auctor. Porttitor fames arcu quis fusce augue enim. Quis at habitant diam at. Suscipit tristique risus, at donec. In turpis vel et quam imperdiet. Ipsum molestie aliquet sodales id est ac volutpat. `,
-  },
-]);
+const columns = ref([]);
 
 const createLink = (uid) => {
   let text = `/dashboard/forum/${uid}/edit`;
@@ -65,17 +62,18 @@ const createLink = (uid) => {
 };
 
 const setStatusColor = (text) => {
-  if (text === "positif") return "primary";
+  if (text.toLowerCase() === "positif") return "primary";
+  else if (text.toLowerCase() === "netral") return "warning";
   else return "danger";
 };
 
 onMounted(() => {
   columns.value.push({ label: "No", key: "no" });
   columns.value.push({ label: "Judul Berita", key: "title" });
-  columns.value.push({ label: "Jenis Media", key: "source" });
-  columns.value.push({ label: "Link / Sumber", key: "source_link" });
+  columns.value.push({ label: "Jenis Media", key: "type" });
+  columns.value.push({ label: "Link / Sumber", key: "url" });
   columns.value.push({ label: "Isi Berita dan Tanggapan", key: "content" });
-  columns.value.push({ label: "Sentimen Berita", key: "sentimen" });
+  columns.value.push({ label: "Sentimen Berita", key: "status" });
   columns.value.push({ label: "Action", key: "action" });
 });
 </script>

@@ -1,8 +1,9 @@
 import { object, string } from "yup";
 
-export const postLogin = (opts = {}, manual = true) => {
+export const postLogin = () => {
   const runtimeConf = useRuntimeConfig();
 
+  const options = ref({});
   const state = ref({
     username: "admins",
     password: "wandering872",
@@ -18,22 +19,22 @@ export const postLogin = (opts = {}, manual = true) => {
     `${runtimeConf.public.clientId}:${runtimeConf.public.clientSecret}`
   );
 
-  const fetcher = useApi(
-    "/user/login/",
-    {
-      method: "post",
+  const fetcher = () =>
+    useNuxtApp().$api("/user/login/", {
       body: state.value,
+      method: "post",
       headers: {
         Authorization: `Basic ${basicAuth}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      ...opts,
-    },
-    manual
-  );
+      ...options.value,
+    });
 
-  return { state, schema, ...fetcher };
+  return { state, schema, options, fetcher };
 };
 
-export const getProfile = (opts = {}, manual = false) =>
-  useApi("/user/profile/", opts, manual);
+export const getProfile = () => {
+  const options = ref({});
+  const fetcher = () => useNuxtApp().$api("/user/profile/", options.value);
+  return { options, fetcher };
+};

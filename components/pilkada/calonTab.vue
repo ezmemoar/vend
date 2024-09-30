@@ -1,5 +1,6 @@
 <template>
   <CalonTable
+    :uid="route.params.uid"
     label="Data Calon PILKADA"
     list-type="pilkada"
     :redirect-after-edit="redirect"

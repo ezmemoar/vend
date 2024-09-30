@@ -1,5 +1,6 @@
 <template>
   <RelawanTable
+    :uid="route.params.uid"
     label="Data Relawan"
     list-type="pilkada"
     :redirect-after-edit="redirect"

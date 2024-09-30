@@ -1,15 +1,26 @@
 <template>
   <div class="flex gap-8">
-    <component :is="props.component" ref="chartRef" :chart-data :options class="basis-1/3" />
-    <div class="basis-2/3 flex flex-col gap-1">
-      <div v-for="(v, i) in labels" :key="i" class="flex items-center gap-2">
-        <div
-          class="size-4 rounded-full"
-          :style="`background-color: ${colors[i]}`"
-        ></div>
-        <BaseText class="text-gray-600">{{ v }} ({{ setPercentage(i) }})</BaseText>
+    <template v-if="data.length > 0">
+      <component
+        :is="props.component"
+        ref="chartRef"
+        :chart-data
+        :options
+        class="basis-1/3"
+      />
+      <div class="basis-2/3 flex flex-col gap-1">
+        <div v-for="(v, i) in labels" :key="i" class="flex items-center gap-2">
+          <div
+            class="size-4 rounded-full"
+            :style="`background-color: ${colors[i]}`"
+          ></div>
+          <BaseText class="text-gray-600">
+            {{ v }} ({{ setPercentage(i) }})
+          </BaseText>
+        </div>
       </div>
-    </div>
+    </template>
+    <p v-else class="italic text-gray-500">Tidak ada data</p>
   </div>
 </template>
 
@@ -42,7 +53,7 @@ const setPercentage = (i) => {
   const selected = chartData.value.datasets[0].data[i];
   const total = chartData.value.datasets[0].data.reduce((a, v) => (a += +v), 0);
 
-  const res = formatNumber((selected / total) * 100);
+  const res = createPercentage(selected, total);
   return `${res}%`;
 };
 

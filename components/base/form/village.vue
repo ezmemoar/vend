@@ -2,8 +2,8 @@
   <UFormGroup :label :name>
     <USelectMenu
       searchable
-      searchable-placeholder="Cari kabupaten / kota..."
-      placeholder="Pilih kabupaten / kota"
+      searchable-placeholder="Cari kelurahan..."
+      placeholder="Pilih kelurahan"
       v-model="model"
       :options="options || []"
       :loading="status === 'pending'"
@@ -15,13 +15,13 @@
 </template>
 
 <script setup>
-import { getRegencies } from "~/services/masterService";
+import { getVillages } from "~/services/masterService";
 
 const props = defineProps({
   filter: Object,
   name: {
     type: String,
-    default: "regency",
+    default: "village",
   },
   label: {
     type: String,
@@ -35,7 +35,7 @@ const props = defineProps({
 
 const model = defineModel();
 
-const { params, fetcher } = getRegencies();
+const { params, fetcher } = getVillages();
 const {
   data: options,
   status,
@@ -47,17 +47,22 @@ const {
 
 watchEffect(() => {
   const v = props.filter;
-  console.log(params.value.provinceId);
   if (v.province) {
     params.value.provinceId = v.province;
   }
-  console.log(params.value.provinceId);
+  if (v.regency) {
+    params.value.regencyId = v.regency;
+  }
+  if (v.district) {
+    params.value.districtId = v.district;
+  }
+
+  if (!v.province || !v.regency || !v.district) options.value = null;
 });
 
 const isParamsFilled = computed(() =>
   Object.keys(params.value).every((v) => !!params.value[v])
 );
-
 watch(isParamsFilled, execute);
 onMounted(() => {
   if (isParamsFilled.value) execute();

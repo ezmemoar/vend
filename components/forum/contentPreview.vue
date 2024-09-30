@@ -1,10 +1,5 @@
 <template>
-  <UButton
-    variant="outline"
-    color="white"
-    label="Lihat"
-    @click="isOpen = true"
-  />
+  <UButton variant="outline" color="white" label="Lihat" @click="open" />
 
   <UModal v-model="isOpen">
     <UCard>
@@ -25,16 +20,28 @@
       <div class="space-y-5">
         <UCard>
           <BaseText type="subtitle" class="font-bold">Isi berita</BaseText>
-          <BaseText class="mt-2">
-            {{ content }}
-          </BaseText>
+          <div class="mt-2">
+            <div v-if="status === 'pending'" class="space-y-3">
+              <USkeleton class="w-full h-4" />
+              <USkeleton class="w-full h-4" />
+            </div>
+            <BaseText v-else>
+              {{ data.content }}
+            </BaseText>
+          </div>
         </UCard>
 
         <UCard>
           <BaseText type="subtitle" class="font-bold">Cara Menanggapi</BaseText>
-          <BaseText class="mt-2">
-            {{ solve }}
-          </BaseText>
+          <div class="mt-2">
+            <div v-if="status === 'pending'" class="space-y-3">
+              <USkeleton class="w-full h-4" />
+              <USkeleton class="w-full h-4" />
+            </div>
+            <BaseText v-else>
+              {{ data.response }}
+            </BaseText>
+          </div>
         </UCard>
       </div>
     </UCard>
@@ -42,10 +49,23 @@
 </template>
 
 <script setup>
-defineProps({
-  content: String,
-  solve: String,
+import { getForum } from "~/services/forumService";
+
+const props = defineProps({
+  uid: String,
+});
+
+const { params, fetcher } = getForum();
+params.value.uid = props.uid;
+const { data, status, execute } = useAsyncData(`forum-${props.uid}`, fetcher, {
+  transform: (v) => v.data,
+  immediate: false,
 });
 
 const isOpen = ref(false);
+
+const open = () => {
+  execute();
+  isOpen.value = true;
+};
 </script>

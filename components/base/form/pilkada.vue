@@ -1,21 +1,26 @@
 <template>
   <UFormGroup :label :name>
-    <USelect
+    <USelectMenu
+      searchable
+      searchable-placeholder="Cari Nomor TPS..."
+      placeholder="Pilih Nomor TPS"
       v-model="model"
       :options="options || []"
       :loading="status === 'pending'"
       :disabled="status === 'pending' || disabled"
       option-attribute="name"
-      value-attribute="url"
+      value-attribute="uid"
     />
   </UFormGroup>
 </template>
 
 <script setup>
+import { getPilkadas } from '~/services/pilkadaService';
+
 defineProps({
   name: {
     type: String,
-    default: "pilkada",
+    default: "election_uid",
   },
   label: {
     type: String,
@@ -29,7 +34,12 @@ defineProps({
 
 const model = defineModel();
 
-const { data: options, status } = await useApi("pokemon", {
-  transform: (val) => val.results,
+const { query, fetcher } = getPilkadas();
+query.value.size = 99999;
+const {
+  data: options,
+  status,
+} = await useAsyncData(fetcher, {
+  transform: (v) => v.data,
 });
 </script>

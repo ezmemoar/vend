@@ -1,18 +1,24 @@
 <template>
   <UFormGroup :label :name>
-    <USelect
+    <USelectMenu
+      searchable
+      searchable-placeholder="Cari Nomor TPS..."
+      placeholder="Pilih Nomor TPS"
       v-model="model"
       :options="options || []"
       :loading="status === 'pending'"
-      :disabled="status === 'pending' || disabled"
-      option-attribute="name"
-      value-attribute="url"
+      :disabled="status === 'pending' || !isParamsFilled || disabled"
+      option-attribute="number"
+      value-attribute="number"
     />
   </UFormGroup>
 </template>
 
 <script setup>
-defineProps({
+import { getTpses } from "~/services/tpsService";
+
+const props = defineProps({
+  filter: Object,
   name: {
     type: String,
     default: "tps_number",
@@ -29,7 +35,30 @@ defineProps({
 
 const model = defineModel();
 
-const { data: options, status } = await useApi("pokemon", {
-  transform: (val) => val.results,
+const { query, fetcher } = getTpses();
+query.value.size = 99999;
+const {
+  data: options,
+  status,
+  execute,
+} = await useAsyncData(fetcher, {
+  transform: (v) => v.data,
+  immediate: false,
+});
+
+watchEffect(() => {
+  const v = props.filter;
+  if (v.village) {
+    query.value.village_id = v.village;
+  }
+  else {
+    options.value = null;
+  }
+});
+
+const isParamsFilled = computed(() => query.value.village_id !== null);
+watch(isParamsFilled, execute);
+onMounted(() => {
+  if (isParamsFilled.value) execute();
 });
 </script>

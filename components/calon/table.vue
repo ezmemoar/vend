@@ -1,19 +1,26 @@
 <template>
-  <BaseTablePagination :label :data :columns>
+  <BaseTablePagination
+    :label
+    :data="data?.data"
+    :columns
+    :loading="status === 'pending' || status === 'idle'"
+  >
     <template #extra-button>
       <slot name="extra-button" />
     </template>
-
     <template #created_at-data="{ row }">
       {{ formatDate(row.created_at, true) }}
     </template>
-    <template #image-data="{ row }">
-      <UAvatar :src="row.image" size="lg" />
+    <template #number-data="{ row }">
+      {{ formatTrailingNumber(row.number) }}
     </template>
-    <template #quick_result-data="{ row }">
+    <template #picture-data="{ row }">
+      <UAvatar :src="row.picture" size="lg" :ui="{ rounded: 'object-cover' }" />
+    </template>
+    <template #quick_count_result-data="{ row }">
       {{ row.quick_result }}%
     </template>
-    <template #real_result-data="{ row }">
+    <template #real_count_result-data="{ row }">
       {{ row.real_result }}%
     </template>
     <template #action-data="{ row }">
@@ -28,6 +35,8 @@
 </template>
 
 <script setup>
+import { getCalons } from "~/services/calonService";
+
 const props = defineProps({
   label: String,
   redirectAfterEdit: String,
@@ -36,22 +45,17 @@ const props = defineProps({
     type: String,
     default: "calon",
   },
+  uid: {
+    type: String,
+    required: false,
+  },
 });
 
-const columns = ref([]);
+const { query, fetcher } = getCalons();
+if (props.uid) query.value.election_uid = props.uid;
+const { data, status } = useAsyncData("calon", fetcher);
 
-const data = ref([
-  {
-    uid: "1",
-    created_at: new Date(),
-    pilkada: "Pilkada Gubernur dan Wakil Gubernur Jawa Barat",
-    no_urut: "01",
-    nama: "Imam - Riri",
-    image: 'https://picsum.photos/200/200',
-    quick_result: 57,
-    real_result: 43,
-  },
-]);
+const columns = ref([]);
 
 const createLink = (uid) => {
   let text = `/dashboard/calon/${uid}/edit`;
@@ -64,16 +68,19 @@ onMounted(() => {
   columns.value.push({ label: "Date Created", key: "created_at" });
 
   if (props.listType === "calon") {
-    columns.value.push({ label: "PILKADA", key: "pilkada" });
+    columns.value.push({ label: "PILKADA", key: "election_name" });
   }
 
-  columns.value.push({ label: "Nomor Urut", key: "no_urut" });
-  columns.value.push({ label: "Nama Calon", key: "nama" });
-  columns.value.push({ label: "Foto", key: "image" });
+  columns.value.push({ label: "Nomor Urut", key: "number" });
+  columns.value.push({ label: "Nama Calon", key: "name" });
+  columns.value.push({ label: "Foto", key: "picture" });
 
   if (props.listType === "pilkada") {
-    columns.value.push({ label: "Hasil Quick Count", key: "quick_result" });
-    columns.value.push({ label: "Hasil Real Count", key: "real_result" });
+    columns.value.push({
+      label: "Hasil Quick Count",
+      key: "quick_count_result",
+    });
+    columns.value.push({ label: "Hasil Real Count", key: "real_count_result" });
   }
 
   columns.value.push({ label: "Action", key: "action" });

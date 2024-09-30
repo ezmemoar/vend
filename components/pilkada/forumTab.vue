@@ -1,5 +1,9 @@
 <template>
-  <ForumTable label="Forum" :redirect-after-edit="redirect">
+  <ForumTable
+    :uid="route.params.uid"
+    label="Forum"
+    :redirect-after-edit="redirect"
+  >
     <template #extra-button>
       <UButton
         :to="`/dashboard/forum/create?redirect=${redirect}`"

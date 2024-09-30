@@ -1,17 +1,22 @@
 <template>
   <UFormGroup :label :name>
-    <USelect
+    <USelectMenu
+      searchable
+      searchable-placeholder="Cari provinsi..."
+      placeholder="Pilih provinsi"
       v-model="model"
       :options="options || []"
       :loading="status === 'pending'"
       :disabled="status === 'pending' || disabled"
       option-attribute="name"
-      value-attribute="url"
+      value-attribute="id"
     />
   </UFormGroup>
 </template>
 
 <script setup>
+import { getProvinces } from "~/services/masterService";
+
 defineProps({
   name: {
     type: String,
@@ -29,7 +34,8 @@ defineProps({
 
 const model = defineModel();
 
-const { data: options, status } = await useApi("pokemon", {
-  transform: (val) => val.results,
+const { fetcher } = getProvinces();
+const { data: options, status } = useAsyncData(fetcher, {
+  transform: (v) => v.data,
 });
 </script>

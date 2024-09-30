@@ -1,12 +1,32 @@
 <template>
-  <BaseTablePagination :label :data :columns>
+  <BaseTablePagination
+    :label
+    :data="data?.data"
+    :columns
+    :loading="status === 'pending' || status === 'idle'"
+  >
     <template #extra-button>
       <slot name="extra-button" />
     </template>
 
-    <template #relawan-data="{ row }">
-      <BaseText class="font-semibold">{{ row.relawan }}</BaseText>
+    <template #name-data="{ row }">
+      <BaseText class="font-semibold">{{ row.name }}</BaseText>
       <BaseText class="text-gray-600">{{ row.email }}</BaseText>
+    </template>
+    <template #tps-data="{ row }">
+      <BaseText>
+        {{ row.tps?.number ? formatTrailingNumber(row.tps?.number) : "-" }}
+      </BaseText>
+    </template>
+    <template #regency-data="{ row }">
+      <BaseText>
+        {{ row.regency?.name || '-' }}
+      </BaseText>
+    </template>
+    <template #village-data="{ row }">
+      <BaseText>
+        {{ row.village?.name || '-' }}
+      </BaseText>
     </template>
     <template #address-data="{ row }">
       <div class="w-80 truncate">{{ row.address }}</div>
@@ -26,6 +46,8 @@
 </template>
 
 <script setup>
+import { getRelawans } from "~/services/relawanService";
+
 const props = defineProps({
   label: String,
   redirectAfterEdit: String,
@@ -34,26 +56,17 @@ const props = defineProps({
     type: String,
     default: "relawan",
   },
+  uid: {
+    type: String,
+    required: false,
+  },
 });
 
-const columns = ref([]);
+const { query, fetcher } = getRelawans();
+if (props.uid) query.value.election_uid = props.uid;
+const { data, status } = useAsyncData("relawan", fetcher);
 
-const data = ref([
-  {
-    uid: "1",
-    relawan: "Rudi Tabuti",
-    email: "rudi@gmail.com",
-    cellphone: "+62829802939283",
-    address:
-      "Depok, Pondok Tirta Jaya Blok Biasa Depok, Pondok Tirta Jaya Blok Biasa Depok, Pondok Tirta Jaya Blok Biasa Depok, Pondok Tirta Jaya Blok Biasa",
-    tps_number: "001",
-    province: "Jawa Barat",
-    city: "Depok",
-    regency: "Cilodong",
-    subregency: "Sukmajaya",
-    penugasan: "Belum Ditugaskan",
-  },
-]);
+const columns = ref([]);
 
 const createLink = (uid) => {
   let text = `/dashboard/relawan/${uid}/edit`;
@@ -64,14 +77,14 @@ const createLink = (uid) => {
 
 onMounted(() => {
   columns.value.push({ label: "No", key: "no" });
-  columns.value.push({ label: "Nama Relawan", key: "relawan" });
-  columns.value.push({ label: "No HP", key: "cellphone" });
+  columns.value.push({ label: "Nama Relawan", key: "name" });
+  columns.value.push({ label: "No HP", key: "phone" });
   columns.value.push({ label: "Alamat Lengkap", key: "address" });
 
   if (props.listType === "pilkada") {
-    columns.value.push({ label: "No TPS", key: "tps_number" });
-    columns.value.push({ label: "Kabupaten / Kota", key: "city" });
-    columns.value.push({ label: "Keluarahan TPS", key: "subregency" });
+    columns.value.push({ label: "No TPS", key: "tps" });
+    columns.value.push({ label: "Kabupaten / Kota", key: "regency" });
+    columns.value.push({ label: "Keluarahan TPS", key: "village" });
   }
 
   if (props.listType === "relawan") {

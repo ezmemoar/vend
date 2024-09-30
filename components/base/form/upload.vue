@@ -89,12 +89,13 @@ const onFileSelected = async (e) => {
   fileSize.value = file.size;
 
   const base64data = convertFileToUrl(file);
-  uploadModel.value = {
-    filename: file.name,
-    file: base64data.split(",")[1],
-    original: file,
-    type: props.type ? parseInt(props.type) : 0,
-  };
+  uploadModel.value = 'https://google.com';
+  // uploadModel.value = {
+  //   filename: file.name,
+  //   file: base64data.split(",")[1],
+  //   original: file,
+  //   type: props.type ? parseInt(props.type) : 0,
+  // };
 };
 
 const removeSelectedFile = () => {

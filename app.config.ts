@@ -20,26 +20,31 @@ export default defineAppConfig({
       },
     },
     input: {
+      base: "disabled:bg-slate-100",
       default: {
         size: "lg",
       },
     },
     inputMenu: {
+      base: "disabled:bg-slate-100",
       default: {
         size: "lg",
       },
     },
     select: {
+      base: "disabled:bg-slate-100",
       default: {
         size: "lg",
       },
     },
     selectMenu: {
+      base: "disabled:bg-slate-100",
       default: {
         size: "lg",
       },
     },
     textarea: {
+      base: "disabled:bg-slate-100",
       default: {
         size: "lg",
       },
