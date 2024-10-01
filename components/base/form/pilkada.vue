@@ -35,7 +35,7 @@ defineProps({
 const model = defineModel();
 
 const { query, fetcher } = getPilkadas();
-query.value.size = 99999;
+query.size = 99999;
 const {
   data: options,
   status,

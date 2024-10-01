@@ -8,10 +8,24 @@
           icon="i-heroicons-arrows-up-down-solid"
           label="Import to Excel"
         />
-        <UButton to="/dashboard/forum/create" icon="i-heroicons-plus" label="Tambah Data" />
+        <UButton
+          to="/dashboard/forum/create"
+          icon="i-heroicons-plus"
+          label="Tambah Data"
+        />
       </div>
     </div>
 
     <ForumTable label="List Data Forum" />
   </div>
 </template>
+
+<script setup>
+definePageMeta({
+  middleware: "is-authenticated",
+});
+
+useSeoMeta({
+  title: "List Forum",
+});
+</script>

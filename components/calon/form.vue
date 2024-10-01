@@ -67,7 +67,7 @@
             name="picture"
             class="basis-full md:basis-4/5 2xl:basis-5/6"
           >
-            <BaseFormUpload v-model="state.picture" class="w-full" />
+            <BaseFormUpload v-model="state.picture" path="calon" only-link :existed-filename="state.picture" class="w-full" />
           </UFormGroup>
         </div>
       </div>

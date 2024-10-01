@@ -21,12 +21,16 @@
       :data="data?.data"
       :columns
       :loading="status === 'pending' || status === 'idle'"
+      :total-page="data?.total_page"
+      :count="data?.count"
     >
       <template #election_type-data="{ row }">
         {{ row.election_type.value }}
       </template>
       <template #province-data="{ row }">{{ row.province.name }}</template>
-      <template #regency-data="{ row }">{{ row.regency?.name || '-' }}</template>
+      <template #regency-data="{ row }">{{
+        row.regency?.name || "-"
+      }}</template>
       <template #tps_submitted-data="{ row }">
         <BaseText>{{ row.tps_submitted }} / {{ row.tps_total }} TPS</BaseText>
         <BaseText>{{ row.submitted_percentage }}%</BaseText>
@@ -67,11 +71,20 @@
 </template>
 
 <script setup>
+definePageMeta({
+  middleware: "is-authenticated",
+});
+
+useSeoMeta({
+  title: "List Pilkada",
+});
+
 import { getPilkadas } from "~/services/pilkadaService";
 
-const toast = useToast();
-const { query, fetcher } = getPilkadas();
-const { data, status } = useAsyncData("pilkada", fetcher);
+const { filter } = useFilterStore();
+const { fetcher } = getPilkadas();
+const { data, status, execute } = useAsyncData("pilkada", fetcher);
+watch(filter, execute);
 
 const columns = [
   {

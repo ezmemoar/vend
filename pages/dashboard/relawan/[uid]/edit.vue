@@ -3,5 +3,12 @@
 </template>
 
 <script setup>
+definePageMeta({
+  middleware: "is-authenticated",
+});
+
 const route = useRoute();
+useSeoMeta({
+  title: `Edit Relawan ${route.params.uid}`,
+});
 </script>

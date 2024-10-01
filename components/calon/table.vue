@@ -3,7 +3,9 @@
     :label
     :data="data?.data"
     :columns
-    :loading="status === 'pending' || status === 'idle'"
+    :loading="status === 'pending'"
+    :total-page="data?.total_page"
+    :count="data?.count"
   >
     <template #extra-button>
       <slot name="extra-button" />
@@ -18,10 +20,10 @@
       <UAvatar :src="row.picture" size="lg" :ui="{ rounded: 'object-cover' }" />
     </template>
     <template #quick_count_result-data="{ row }">
-      {{ row.quick_result }}%
+      {{ row.quick_result || 0 }}%
     </template>
     <template #real_count_result-data="{ row }">
-      {{ row.real_result }}%
+      {{ row.real_result || 0 }}%
     </template>
     <template #action-data="{ row }">
       <UButton
@@ -51,9 +53,11 @@ const props = defineProps({
   },
 });
 
+const { filter } = useFilterStore();
 const { query, fetcher } = getCalons();
 if (props.uid) query.value.election_uid = props.uid;
-const { data, status } = useAsyncData("calon", fetcher);
+const { data, status, execute } = useAsyncData("calon", fetcher);
+watch(filter, execute);
 
 const columns = ref([]);
 
@@ -63,6 +67,7 @@ const createLink = (uid) => {
 
   return text;
 };
+
 
 onMounted(() => {
   columns.value.push({ label: "Date Created", key: "created_at" });

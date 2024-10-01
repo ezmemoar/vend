@@ -19,3 +19,13 @@
     <CalonTable label="List Data Calon PILKADA" />
   </div>
 </template>
+
+<script setup>
+definePageMeta({
+  middleware: "is-authenticated",
+});
+
+useSeoMeta({
+  title: "List Calon",
+});
+</script>

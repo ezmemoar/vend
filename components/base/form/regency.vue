@@ -47,11 +47,9 @@ const {
 
 watchEffect(() => {
   const v = props.filter;
-  console.log(params.value.provinceId);
   if (v.province) {
     params.value.provinceId = v.province;
   }
-  console.log(params.value.provinceId);
 });
 
 const isParamsFilled = computed(() =>

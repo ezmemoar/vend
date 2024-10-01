@@ -1,12 +1,9 @@
 import { object, string } from "yup";
 
 export const getForums = () => {
+  const { filter } = useFilterStore();
   const options = ref({});
   const query = ref({
-    page: 1,
-    size: 10,
-    sort: "DESC",
-    search: null,
     status: null,
     type: null,
   });
@@ -14,7 +11,7 @@ export const getForums = () => {
   const fetcher = () =>
     useNuxtApp().$api("/data/news/list/", {
       method: "get",
-      query: query.value,
+      query: { ...filter, ...query.value },
       ...options.value,
     });
 
@@ -22,12 +19,9 @@ export const getForums = () => {
 };
 
 export const getForumsForUser = () => {
+  const { filter } = useFilterStore();
   const options = ref({});
   const query = ref({
-    page: 1,
-    size: 10,
-    sort: "DESC",
-    search: null,
     status: null,
     type: null,
   });
@@ -35,7 +29,7 @@ export const getForumsForUser = () => {
   const fetcher = () =>
     useNuxtApp().$api(`/data/user/news/list/`, {
       method: "get",
-      query: query.value,
+      query: { ...filter, ...query.value },
       ...options.value,
     });
 

@@ -16,3 +16,13 @@
     <RelawanTable label="List Data Relawan" />
   </div>
 </template>
+
+<script setup>
+definePageMeta({
+  middleware: "is-authenticated",
+});
+
+useSeoMeta({
+  title: `List Relawan`,
+});
+</script>

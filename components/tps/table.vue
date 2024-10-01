@@ -4,6 +4,8 @@
     :data="data?.data"
     :columns
     :loading="status === 'pending'"
+    :total-page="data?.total_page"
+    :count="data?.count"
   >
     <template #province-data="{ row }">
       {{ row.province.name }}
@@ -44,9 +46,11 @@ const props = defineProps({
   },
 });
 
+const { filter } = useFilterStore();
 const { query, fetcher } = getTpses();
 if (props.uid) query.value.election_uid = props.uid;
-const { data, status } = useAsyncData("tps", fetcher);
+const { data, status, execute } = useAsyncData("tps", fetcher);
+watch(filter, execute);
 
 const columns = ref([]);
 

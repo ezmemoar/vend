@@ -8,7 +8,11 @@
           icon="i-heroicons-magnifying-glass"
           placeholder="Search"
         />
-        <UButton color="white" icon="i-heroicons-funnel-solid" label="Filters" />
+        <UButton
+          color="white"
+          icon="i-heroicons-funnel-solid"
+          label="Filters"
+        />
         <slot name="extra-button" />
       </div>
     </div>
@@ -40,15 +44,15 @@
     >
       <UButton
         color="white"
-        :disabled="params.page == 1 || loading"
+        :disabled="filter.page == 1 || loading"
         @click="prevPage"
       >
         Previous
       </UButton>
-      <div>Page {{ startPage }} of {{ endPage }}</div>
+      <div>Page {{ filter.page }} of {{ totalPage }}</div>
       <UButton
         color="white"
-        :disabled="params.page == totalPage || totalPage === 0 || loading"
+        :disabled="filter.page == totalPage || totalPage === 0 || loading"
         @click="nextPage"
       >
         Next
@@ -71,46 +75,33 @@ const props = defineProps({
 
 const route = useRoute();
 const {
-  columnsKey,
-  changePage,
-  startPage,
-  endPage,
-  calculateRowNumber,
-  sort,
-  params,
+  filter,
+  changePage: changeFilter,
   nextPage,
   prevPage,
-} = useLocalTable();
+} = useFilterStore();
+const { columnsKey, changePage, calculateRowNumber, sort, params } =
+  useLocalTable();
 
 watch(
   sort,
   (val) => {
     const text = `${val.direction === "asc" ? "" : "-"}${val.column}`;
-    params.value.sort = text;
+    filter.sort = text;
     changePage();
   },
   { deep: true }
 );
 
 watch(
-  () => params.value.page_size,
+  () => filter.size,
   () => {
-    params.value.page = 1;
-    changePage();
+    filter.page = 1;
+    changeFilter();
   }
 );
 
-watch(
-  () => params.value.page,
-  (val) => (params.value.page = val)
-);
-
 function useLocalTable() {
-  const params = ref({
-    page: route.query?.page ? +route.query.page : 1,
-    page_size: route.query?.page_size ? +route.query.page_size : 15,
-    sort: route.query?.sort ? route.query.sort : "",
-  });
   const sort = ref({
     column: route.query.sort?.split("-").join("") || "",
     direction: route.query?.sort
@@ -129,42 +120,17 @@ function useLocalTable() {
       delete newParams.sort;
     }
 
-    navigateTo({
-      query: { ...(route.query ?? {}), ...params.value },
-    });
+    changeFilter();
   };
 
-  const startPage = computed(
-    () => 1 + params.value.page_size * (params.value.page - 1)
-  );
-
-  const endPage = computed(() => {
-    const total = params.value.page_size * params.value.page;
-    return props.count && total > props.count ? props.count : total;
-  });
-
-  const nextPage = () => {
-    params.value.page++;
-    changePage();
-  };
-
-  const prevPage = () => {
-    params.value.page--;
-    changePage();
-  };
-
-  const calculateRowNumber = (i) => startPage.value + i;
+  const lastRowPage = computed(() => 1 + filter.size * (filter.page - 1));
+  const calculateRowNumber = (i) => lastRowPage.value + i;
 
   return {
     columnsKey,
     changePage,
-    startPage,
-    endPage,
     calculateRowNumber,
     sort,
-    params,
-    nextPage,
-    prevPage,
   };
 }
 </script>

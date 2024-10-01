@@ -47,8 +47,14 @@
 
 <script setup>
 import { getPilkada } from "~/services/pilkadaService";
+definePageMeta({
+  middleware: "is-authenticated",
+});
 
 const route = useRoute();
+useSeoMeta({
+  title: `View Pilkada ${route.params.uid}`,
+});
 
 const { selectedTab, tabs, handleChangeTab } = useLocalTabs();
 

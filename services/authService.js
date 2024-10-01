@@ -5,7 +5,7 @@ export const postLogin = () => {
 
   const options = ref({});
   const state = ref({
-    username: "admins",
+    username: "admin",
     password: "wandering872",
     grant_type: "password",
   });

@@ -1,18 +1,13 @@
-import { object, string } from "yup";
+import { array, number, object, string } from "yup";
 
 export const getPilkadas = () => {
+  const { filter: query } = useFilterStore();
   const options = ref({});
-  const query = ref({
-    page: 1,
-    size: 10,
-    sort: "DESC",
-    search: null,
-  });
 
   const fetcher = () =>
     useNuxtApp().$api("/data/election/list/", {
       method: "get",
-      query: query.value,
+      query,
       ...options.value,
     });
 
@@ -160,23 +155,35 @@ export const updatePilkadaResult = () => {
     resultUid: null,
   });
   const state = ref({
-    result: null,
+    result: [],
     status: null,
     lembar_saksi: null,
   });
 
   const schema = object({
-    result: string().required("Field harus diisi harus diisi"),
-    status: string().required("Status harus diisi"),
-    lembar_saksi: string().required("Lembar saksi harus diisi"),
+    // result: array(
+    //   object({
+    //     election_id: string().required("UID election harus diisi"),
+    //     total_votes: number().typeError("Total votes harus diisi"),
+    //   })
+    // ),
+    // status: string().required("Status harus diisi"),
+    // lembar_saksi: string().required("Lembar saksi harus diisi"),
   });
 
   const fetcher = () =>
     useNuxtApp().$api(
       `/data/election/${params.value.uid}/result/${params.value.resultUid}/`,
       {
-        method: "post",
-        body: state.value,
+        method: "put",
+        body: {
+          status: state.value.status,
+          lembar_saksi: state.value.lembar_saksi,
+          result: state.value.result.map(({ candidate_id, total_votes }) => ({
+            candidate_id,
+            total_votes,
+          })),
+        },
         ...options.value,
       }
     );

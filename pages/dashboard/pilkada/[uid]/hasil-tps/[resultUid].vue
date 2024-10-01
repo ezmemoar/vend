@@ -1,5 +1,14 @@
 <template>
-  <UForm :schema :state @submit="handleConfirmation">
+  <div
+    v-if="status === 'pending' || status === 'idle'"
+    class="w-full flex justify-center"
+  >
+    <UIcon
+      name="i-tdesign-loading"
+      class="size-14 animate-spin text-gray-500"
+    />
+  </div>
+  <UForm v-else :schema :state @submit="openModal">
     <div class="flex flex-col gap-7">
       <div class="flex justify-between w-full">
         <BaseText el="h1" type="title"> Hasil Pemilihan TPS </BaseText>
@@ -8,54 +17,88 @@
             :to="`/dashboard/pilkada/${route.params.uid}`"
             color="white"
             label="Cancel"
+            :disabled="mutateStatus === 'pending'"
+            :loading="mutateStatus === 'pending'"
           />
-          <UButton type="submit" label="Save" />
+          <UButton
+            type="submit"
+            label="Save"
+            :disabled="
+              mutateStatus === 'pending' ||
+              data?.status.id === HASIL_TPS_STATUS.ACCEPTED
+            "
+            :loading="mutateStatus === 'pending'"
+          />
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-10">
-        <BaseListTile title="PILKADA" :subtitle="detailData.pilkada" />
-        <BaseListTile title="Nomor TPS" :subtitle="detailData.tps_number" />
-        <BaseListTile title="Kabupaten / Kota" :subtitle="detailData.city" />
-        <BaseListTile title="Kelurahan" :subtitle="detailData.subregency" />
+        <BaseListTile title="PILKADA" :subtitle="data?.election" />
+        <BaseListTile title="Nomor TPS" :subtitle="data?.tps?.number" />
+        <BaseListTile
+          title="Kabupaten / Kota"
+          :subtitle="data?.regency?.name"
+        />
+        <BaseListTile title="Kelurahan" :subtitle="data?.village?.name" />
         <BaseListTile title="Relawan">
           <template #subtitle>
-            <BaseText>
-              {{ detailData.relawan }} ({{ detailData.cellphone }})
-            </BaseText>
-            <BaseText>{{ detailData.email }}</BaseText>
+            <BaseText> {{ data?.relawan?.name }} </BaseText>
+            <BaseText>{{ data?.relawan?.email }}</BaseText>
           </template>
         </BaseListTile>
         <BaseListTile
           title="Data Uploaded"
-          :subtitle="formatDate(detailData.uploaded_at, true)"
+          :subtitle="formatDate(data?.created_at, true)"
         />
       </div>
 
       <hr />
 
-      <div class="flex w-[80%]">
+      <div class="flex w-[80%] items-center">
         <BaseText class="basis-1/6">Suara Pemilihan TPS</BaseText>
-        <UFormGroup class="basis-5/6" name="name">
-          <UInput v-model="state.name" />
-        </UFormGroup>
+        <div class="basis-5/6 space-y-5">
+          <UFormGroup
+            v-for="(val, i) in state.result"
+            :key="val.candidate_id"
+            :name="`result[${i}].total_votes`"
+            :label="`${i + 1}. ${val.name}`"
+          >
+            <BaseFormNumber
+              v-model="state.result[i].total_votes"
+              :disabled="mutateStatus === 'pending'"
+              :loading="mutateStatus === 'pending'"
+            />
+          </UFormGroup>
+        </div>
       </div>
 
       <hr />
 
-      <div class="flex w-[80%]">
+      <div class="flex w-[80%] items-center">
         <BaseText class="basis-1/6">Lembar Saksi</BaseText>
-        <UFormGroup class="basis-5/6" name="name">
-          <BaseFormUpload v-model="state.lembar_saksi" />
+        <UFormGroup class="basis-5/6" name="lembar_saksi">
+          <BaseFormUpload
+            v-model="state.lembar_saksi"
+            path="pilkada-result"
+            :existed-filename="state.lembar_saksi"
+            only-link
+            :disabled="mutateStatus === 'pending'"
+            :loading="mutateStatus === 'pending'"
+          />
         </UFormGroup>
       </div>
 
       <hr />
 
-      <div class="flex w-[80%]">
+      <div class="flex w-[80%] items-center">
         <BaseText class="basis-1/6">Status</BaseText>
         <UFormGroup class="basis-5/6" name="status">
-          <USelect v-model="state.status" :options="statusOptions" />
+          <USelect
+            v-model="state.status"
+            :options="statusOptions"
+            :disabled="mutateStatus === 'pending'"
+            :loading="mutateStatus === 'pending'"
+          />
         </UFormGroup>
       </div>
 
@@ -64,39 +107,57 @@
       <div class="flex justify-end items-center gap-3">
         <UButton
           :to="`/dashboard/pilkada/${route.params.uid}`"
+          :disabled="mutateStatus === 'pending'"
+          :loading="mutateStatus === 'pending'"
           color="white"
           label="Cancel"
         />
-        <UButton type="submit" label="Save" />
+        <UButton
+          type="submit"
+          :disabled="
+            mutateStatus === 'pending' ||
+            data?.status.id === HASIL_TPS_STATUS.ACCEPTED
+          "
+          :loading="mutateStatus === 'pending'"
+          label="Save"
+        />
       </div>
     </div>
   </UForm>
 
-  <BaseModalConfirmation v-model="isOpen" @confirm="handleSubmit" />
+  <BaseModalConfirmation
+    v-model="isOpen"
+    :loading="mutateStatus === 'pending'"
+    @confirm="handleSubmit"
+  />
 </template>
 
 <script setup>
+import { HASIL_TPS_STATUS } from "~/constants/status";
 import {
   getPilkadaResult,
   updatePilkadaResult,
 } from "~/services/pilkadaService";
 
-const route = useRoute();
-const toast = useToast();
-
-const { params, fetcher } = getPilkadaResult();
-params.value.uid = route.params.uid;
-params.value.resultUid = route.params.resultUid;
-const { data, status, execute } = useAsyncData(fetcher, {
-  immediate: false,
-  transform: (v) => v.data,
+definePageMeta({
+  middleware: "is-authenticated",
 });
+
+const route = useRoute();
+useSeoMeta({
+  title: `Edit Pilkada Result ${route.params.resultUid}`,
+});
+
+const toast = useToast();
 
 const {
   state,
   schema,
-  fetcher: fetchMutatePilkadaResult,
+  params: mutateParams,
+  fetcher: fetchMutatePilkada,
 } = updatePilkadaResult();
+mutateParams.value.uid = route.params.uid;
+mutateParams.value.resultUid = route.params.resultUid;
 const {
   status: mutateStatus,
   execute: executeMutate,
@@ -105,26 +166,47 @@ const {
   immediate: false,
 });
 
+const { params, fetcher } = getPilkadaResult();
+params.value.uid = route.params.uid;
+params.value.resultUid = route.params.resultUid;
+const { data, status } = useAsyncData(fetcher, {
+  transform: (v) => {
+    state.value.result.push(
+      ...v.data.candidates.map((val) => ({
+        candidate_id: val.uid,
+        name: val.name,
+        total_votes: val.number,
+      }))
+    );
+
+    state.value.status = v.data.status.id;
+    return v.data;
+  },
+});
+
 const { statusOptions, handleSubmit } = useLocalForm();
-const { isOpen, handleConfirmation } = useLocalModal();
+const { isOpen, openModal } = useLocalModal();
 
 function useLocalForm() {
   const statusOptions = [
     {
       label: "Menunggu Verifikasi",
-      value: "Menunggu Verifikasi",
+      value: HASIL_TPS_STATUS.WAITING,
     },
     {
       label: "Laporan Selesai",
-      value: "Laporan Selesai",
+      value: HASIL_TPS_STATUS.ACCEPTED,
     },
     {
       label: "Laporak Ditolak",
-      value: "Laporak Ditolak",
+      value: HASIL_TPS_STATUS.REJECTED,
     },
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    await executeMutate();
+    if (mutateError.value) return;
+
     toast.add({
       title: "Laporan berhasil diverifikasi",
       icon: "i-heroicons-check-circle",
@@ -137,7 +219,7 @@ function useLocalForm() {
 }
 function useLocalModal() {
   const isOpen = ref(false);
-  const handleConfirmation = () => (isOpen.value = true);
-  return { isOpen, handleConfirmation };
+  const openModal = () => (isOpen.value = true);
+  return { isOpen, openModal };
 }
 </script>

@@ -12,21 +12,16 @@ const createPayload = (v) => {
   };
   if (v.uid) p.uid = v.uid;
   return p;
-}
+};
 
 export const getRelawans = () => {
+  const { filter: query } = useFilterStore();
   const options = ref({});
-  const query = ref({
-    page: 1,
-    size: 10,
-    sort: "DESC",
-    search: null,
-  });
 
   const fetcher = () =>
     useNuxtApp().$api("/user/list/", {
       method: "get",
-      query: query.value,
+      query,
       ...options.value,
     });
 

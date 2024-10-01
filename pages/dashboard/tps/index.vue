@@ -14,3 +14,13 @@
     <TpsTable label="List Data TPS" />
   </div>
 </template>
+
+<script setup>
+definePageMeta({
+  middleware: "is-authenticated",
+});
+
+useSeoMeta({
+  title: `List TPS`,
+});
+</script>

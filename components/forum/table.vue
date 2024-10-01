@@ -3,7 +3,9 @@
     :label
     :data="data?.data"
     :columns
-    :loading="status === 'pending' || status === 'idle'"
+    :loading="status === 'pending'"
+    :total-page="data?.total_page"
+    :count="data?.count"
   >
     <template #extra-button>
       <slot name="extra-button" />
@@ -48,9 +50,11 @@ const props = defineProps({
   },
 });
 
+const { filter } = useFilterStore();
 const { query, fetcher } = getForums();
 if (props.uid) query.value.election_uid = props.uid;
-const { data, status } = useAsyncData("forum", fetcher);
+const { data, status, execute } = useAsyncData("forum", fetcher);
+watch(filter, execute);
 
 const columns = ref([]);
 

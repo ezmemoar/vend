@@ -1,12 +1,9 @@
 import { object, string } from "yup";
 
 export const getTpses = () => {
+  const { filter } = useFilterStore();
   const options = ref({});
   const query = ref({
-    page: 1,
-    size: 10,
-    sort: "DESC",
-    search: null,
     election_uid: null,
     village_id: null,
   });
@@ -14,7 +11,7 @@ export const getTpses = () => {
   const fetcher = () =>
     useNuxtApp().$api("/data/tps/list/", {
       method: "get",
-      query: query.value,
+      query: filter,
       ...options.value,
     });
 
@@ -56,7 +53,7 @@ export const updateTps = () => {
   const fetcher = () =>
     useNuxtApp().$api(`/data/tps/update/`, {
       method: "post",
-      body: (({uid, name}) => ({uid, name}))(state.value),
+      body: (({ uid, name }) => ({ uid, name }))(state.value),
       ...options.value,
     });
 

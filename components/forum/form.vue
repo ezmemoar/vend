@@ -55,7 +55,7 @@
           >
             <URadioGroup
               class="basis-5/6"
-              :ui="{ fieldset: 'flex items-center flex-row gap-10' }"
+              :ui="{ fieldset: 'flex items-center flex-row flex-wrap gap-5' }"
               v-model="state.status"
               :options="statusOptions"
             />
@@ -69,7 +69,7 @@
           <UFormGroup class="basis-full md:basis-4/5 2xl:basis-5/6" name="type">
             <URadioGroup
               class="basis-5/6"
-              :ui="{ fieldset: 'flex items-center flex-row gap-10' }"
+              :ui="{ fieldset: 'flex items-center flex-row gap-5' }"
               v-model="state.type"
               :options="typeOptions"
             />
@@ -84,7 +84,13 @@
           </BaseText>
           <div class="basis-full md:basis-4/5 2xl:basis-5/6 space-y-7">
             <UFormGroup label="Gambar" name="image">
-              <BaseFormUpload v-model="state.image" class="w-full" />
+              <BaseFormUpload
+                v-model="state.image"
+                path="forum"
+                only-link
+                :existed-filename="state.image"
+                class="w-full"
+              />
             </UFormGroup>
             <UFormGroup label="Link" name="url">
               <UInput

@@ -6,3 +6,9 @@ export const BADGE_COLOR_STATUS = {
   success: "green",
   info: "blue",
 };
+
+export const HASIL_TPS_STATUS = {
+  WAITING: 1,
+  ACCEPTED: 2,
+  REJECTED: 3,
+};

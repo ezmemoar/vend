@@ -47,6 +47,11 @@ import { getProfile, postLogin } from "~/services/authService";
 
 definePageMeta({
   layout: "blank",
+  middleware: "is-guest",
+});
+
+useSeoMeta({
+  title: "Login",
 });
 
 const authStore = useAuthStore();
@@ -56,11 +61,14 @@ const { data, status, execute } = useAsyncData(fetcher, {
   immediate: false,
 });
 
-// const {
-//   data: profileData,
-//   status: profileStatus,
-//   refresh: fetchProfile,
-// } = getProfile({}, true);
+const { fetcher: profileFetcher } = getProfile({}, true);
+const {
+  data: profileData,
+  status: profileStatus,
+  execute: fetchProfile,
+} = useAsyncData(profileFetcher, {
+  immediate: false,
+});
 
 const handleSubmit = async () => {
   await execute();

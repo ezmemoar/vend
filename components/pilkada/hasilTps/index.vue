@@ -29,7 +29,7 @@
     </template>
     <template #action-data="{ row }">
       <UButton
-        :to="`/dashboard/pilkada/${row.uid}/hasil-tps/${row.uid}`"
+        :to="`/dashboard/pilkada/${route.params.uid}/hasil-tps/${row.uid}`"
         variant="ghost"
         color="slate"
         icon="i-heroicons-eye-solid"

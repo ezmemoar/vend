@@ -1,19 +1,16 @@
 import { object, string } from "yup";
 
 export const getCalons = () => {
+  const { filter } = useFilterStore();
   const options = ref({});
   const query = ref({
-    page: 1,
-    size: 10,
-    sort: "DESC",
-    search: null,
     election_uid: null,
   });
 
   const fetcher = () =>
     useNuxtApp().$api("/data/candidate/list/", {
       method: "get",
-      query: query.value,
+      query: { ...filter, ...query.value },
       ...options.value,
     });
 

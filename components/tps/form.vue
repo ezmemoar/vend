@@ -94,6 +94,7 @@
           </BaseText>
           <BaseFormRelawan
             v-model="state.name"
+            with-no-data
             class="basis-full md:basis-4/5 2xl:basis-5/6"
           />
         </div>

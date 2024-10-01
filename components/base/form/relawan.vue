@@ -15,9 +15,9 @@
 </template>
 
 <script setup>
-import { getRelawans } from '~/services/relawanService';
+import { getRelawans } from "~/services/relawanService";
 
-defineProps({
+const props = defineProps({
   name: {
     type: String,
     default: "number",
@@ -30,13 +30,23 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  withNoData: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const model = defineModel();
 
 const { query, fetcher } = getRelawans();
-query.value.size = 9999;
+query.size = 9999;
 const { data: options, status } = await useAsyncData(fetcher, {
-  transform: (v) => v.data,
+  transform: (v) => {
+    let arr = v.data;
+    if (props.withNoData) arr.unshift({ name: "Tidak ada", uid: '' });
+
+    console.log(arr);
+    return arr;
+  },
 });
 </script>

@@ -14,23 +14,26 @@ export const useAuthStore = defineStore("auth", () => {
     elections: null,
   });
 
+  const isAuthenticated = () =>
+    !!user.value.access_token && new Date(user.value.expired_at) > new Date();
+
   const setUser = (payload) => {
     const newPayload = { ...payload };
-
-    console.log(newPayload);
 
     if (newPayload.expires_in) {
       const d = new Date();
       const milimeter = 1000;
       newPayload.expired_at = new Date(
         d.getTime() + +newPayload.expires_in * milimeter
-      );
+      ).toString();
     }
 
-    user.value = { ...user.value, ...payload };
+    console.log(newPayload);
+
+    user.value = { ...user.value, ...newPayload };
   };
 
   const clearUser = () => (user.value = null);
 
-  return { user, setUser, clearUser };
+  return { user, setUser, clearUser, isAuthenticated };
 });
