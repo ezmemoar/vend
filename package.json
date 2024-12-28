@@ -16,10 +16,14 @@
     "@pinia/nuxt": "^0.5.4",
     "@vueuse/core": "^11.0.3",
     "@vueuse/nuxt": "^11.0.3",
+    "chart.js": "^3.9.1",
     "dayjs-nuxt": "^2.1.11",
+    "filepond": "^4.32.1",
     "nuxt": "^3.12.4",
     "pinia": "^2.2.2",
     "v-calendar": "^3.1.2",
+    "vue-chart-3": "^3.1.8",
+    "vue-filepond": "^7.0.4",
     "yup": "^1.4.0"
   }
 }

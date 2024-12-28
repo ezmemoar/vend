@@ -1,5 +1,5 @@
 <template>
-  <UModal v-model="modalShow">
+  <UModal v-model="isModalOpen">
     <div class="p-4 rounded flex flex-col items-center gap-4">
       <UIcon
         name="i-heroicons-exclamation-circle"
@@ -8,7 +8,7 @@
       <div class="font-bold text-lg">
         <slot name="title">Apakah anda yakin?</slot>
       </div>
-      <div>
+      <div v-if="$slots.description">
         <slot name="description"> </slot>
       </div>
       <div class="mt-5 grid grid-cols-2 gap-3 w-full">
@@ -19,7 +19,7 @@
           size="md"
           color="gray"
           class="mt-2 w-full"
-          @click="modalShow = false"
+          @click="isModalOpen = false"
         >
           <slot name="deny-text">Tidak</slot>
         </UButton>
@@ -38,13 +38,12 @@
   </UModal>
 </template>
 
-<script setup>
-defineProps({
-  loading: Boolean,
-})
+<script setup lang="ts">
+defineProps<{ loading: boolean }>();
 
-const emit = defineEmits(['confirm'])
+const emit = defineEmits(["confirm"]);
 
-const modalShow = defineModel()
+const isModalOpen = defineModel({
+  default: false,
+});
 </script>
-F

@@ -1,16 +1,26 @@
+<template>
+  <VCalendarDatePicker
+    v-if="props.range"
+    v-model.range="date"
+    :columns="2"
+    v-bind="{ ...attrs, ...$attrs }"
+  />
+  <VCalendarDatePicker v-else v-model="date" v-bind="{ ...attrs, ...$attrs }" />
+</template>
+
 <script setup lang="ts">
 import { DatePicker as VCalendarDatePicker } from "v-calendar";
 import type {
   DatePickerDate,
   DatePickerRangeObject,
+  // @ts-ignore
 } from "v-calendar/dist/types/src/use/datePicker";
 import "v-calendar/dist/style.css";
 
+const props = withDefaults(defineProps<{ range: boolean }>(), { range: false });
 const emit = defineEmits<{
   close: [];
 }>();
-
-defineProps({ range: Boolean });
 
 const model = defineModel<DatePickerDate | DatePickerRangeObject | null>();
 
@@ -30,16 +40,6 @@ const attrs = {
   "first-day-of-week": 2,
 };
 </script>
-
-<template>
-  <VCalendarDatePicker
-    v-if="range"
-    v-model.range="date"
-    :columns="2"
-    v-bind="{ ...attrs, ...$attrs }"
-  />
-  <VCalendarDatePicker v-else v-model="date" v-bind="{ ...attrs, ...$attrs }" />
-</template>
 
 <style>
 :root {

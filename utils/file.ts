@@ -1,7 +1,7 @@
-export const convertFileToUrl = (file) =>
+export const convertFileToUrl = (file: Blob | BlobPart[]) =>
   new Promise((resolve, reject) => {
-    let blob = file;
-    if (!(blob instanceof Blob)) {
+    let blob = file as Blob;
+    if (!(file instanceof Blob)) {
       blob = new Blob(file);
     }
 
@@ -11,8 +11,13 @@ export const convertFileToUrl = (file) =>
     reader.onerror = reject;
   });
 
-export const downloadFile = ({ data, type, filename }) => {
-  const blob = new Blob([data], { type });
+interface LocalFileToDownload {
+  filename: string;
+  type: string;
+  data: BlobPart[];
+}
+export const downloadFile = ({ filename, type, data }: LocalFileToDownload) => {
+  const blob = new Blob(data, { type });
   const link = document.createElement("a");
 
   const href = URL.createObjectURL(blob);

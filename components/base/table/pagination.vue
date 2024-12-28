@@ -1,6 +1,8 @@
 <template>
-  <div class="rounded shadow border border-slate-200 pb-3">
-    <UTable v-model:sort="sort" :rows="data" :columns :ui :loading>
+  <div
+    class="rounded shadow border border-slate-200 dark:border-slate-800 pb-3"
+  >
+    <UTable :rows="loading ? [] : data" :columns :ui :loading>
       <template #no-data="{ index }">
         {{ calculateRowNumber(index) }}.
       </template>
@@ -22,13 +24,23 @@
       </template>
     </UTable>
 
-    <div class="px-2 mt-2">
-      Show {{ startPage }} of {{ endPage }}
-      {{ count ? `from ${count} data` : "" }}
-    </div>
-    <div class="w-full p-3 rounded-b-full flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <UButton :disabled="params.page == 1 || loading" @click="prevPage">
+    <div
+      class="flex max-sm:flex-col items-center border-t border-slate-200 dark:border-slate-800"
+    >
+      <div class="sm:basis-1/3 sm:w-1/3"></div>
+      <div class="sm:basis-1/3 sm:w-1/3 px-5 mt-2 text-center">
+        Show {{ startPage }} {{ endPage ? `of ${endPage}` : "" }}
+        {{ count ? `from ${count} data` : "" }}
+      </div>
+
+      <div
+        class="p-3 flex justify-end items-center gap-3 sm:basis-1/3 sm:w-1/3"
+      >
+        <USelect :options="sizeOptions" v-model="params.page_size" />
+        <UButton
+          :disabled="params.page == 1 || totalPage === 0 || loading"
+          @click="prevPage"
+        >
           Prev
         </UButton>
         <UButton
@@ -37,71 +49,33 @@
         >
           Next
         </UButton>
-        <USelect :options="sizeOptions" v-model="params.page_size" />
-      </div>
-      <div class="flex justify-end items-center">
-        Page
-        <template v-if="!totalPage">{{ params.page }}</template>
-        <template v-else>
-          <UTooltip
-            :ui="{
-              wrapper: 'w-[20%] px-2',
-              background: 'bg-primary-600',
-              color: 'text-white',
-            }"
-            text="tekan enter untuk pindah halaman"
-            :popper="{ placement: 'top' }"
-          >
-            <UInput
-              size="sm"
-              :value="params.page"
-              @keyup.enter="validatePage"
-            />
-          </UTooltip>
-          from
-          {{ totalPage }}
-        </template>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  withSort: Boolean,
-  data: Array,
-  columns: Array,
-  loading: Boolean,
-  totalPage: Number,
-  count: Number,
-  ui: Object,
-});
+<script setup lang="ts">
+const props = defineProps<{
+  data: TableData[];
+  columns: TableColumn[];
+  loading: boolean;
+  ui: object;
+  count: number;
+  totalPage: number;
+}>();
 
-const toast = useToast();
 const route = useRoute();
+
+const { params, sizeOptions } = useLocalPagination();
 const {
   columnsKey,
-  changePage,
+  calculateRowNumber,
   startPage,
   endPage,
-  calculateRowNumber,
-  validatePage,
-  sizeOptions,
-  sort,
-  params,
-  nextPage,
   prevPage,
+  nextPage,
+  changePage,
 } = useLocalTable();
-
-watch(
-  sort,
-  (val) => {
-    const text = `${val.direction === "asc" ? "" : "-"}${val.column}`;
-    params.value.sort = text;
-    changePage();
-  },
-  { deep: true }
-);
 
 watch(
   () => params.value.page_size,
@@ -111,60 +85,33 @@ watch(
   }
 );
 
-watch(
-  () => params.value.page,
-  (val) => (params.value.page = val)
-);
-
-function useLocalTable() {
+function useLocalPagination() {
   const sizeOptions = [10, 15, 30, 50, 100];
   const params = ref({
     page: route.query?.page ? +route.query.page : 1,
     page_size: route.query?.page_size ? +route.query.page_size : 15,
     sort: route.query?.sort ? route.query.sort : "",
   });
-  const sort = ref({
-    column: route.query.sort?.split("-").join("") || "",
-    direction: route.query?.sort
-      ? route.query.sort?.includes("-")
-        ? "desc"
-        : "asc"
-      : "",
-  });
 
+  return { params, sizeOptions };
+}
+
+function useLocalTable() {
   const columnsKey = computed(() => props.columns.map((val) => val.key));
-
-  const changePage = () => {
-    const newParams = { ...params.value };
-
-    if (!props.withSort) {
-      delete newParams.sort;
-    }
-
-    navigateTo({
-      query: { ...(route.query ?? {}), ...params.value },
-    });
-  };
-
-  const validatePage = (e) => {
-    if (e.target.value > props.totalPage) {
-      return toast.add({ title: "Page tidak boleh melebihi maksimal" });
-    }
-    if (e.target.value < 1) {
-      return toast.add({ title: "Page tidak boleh kosong atau minus" });
-    }
-    params.value.page = e.target.value;
-    changePage();
-  };
-
   const startPage = computed(
     () => 1 + params.value.page_size * (params.value.page - 1)
   );
-
   const endPage = computed(() => {
     const total = params.value.page_size * params.value.page;
     return props.count && total > props.count ? props.count : total;
   });
+
+  const calculateRowNumber = (i: number) => startPage.value + i;
+
+  const changePage = () =>
+    navigateTo({
+      query: { ...(route.query ?? {}), ...params.value },
+    });
 
   const nextPage = () => {
     params.value.page++;
@@ -176,20 +123,14 @@ function useLocalTable() {
     changePage();
   };
 
-  const calculateRowNumber = (i) => startPage.value + i;
-
   return {
     columnsKey,
-    changePage,
+    calculateRowNumber,
     startPage,
     endPage,
-    calculateRowNumber,
-    validatePage,
-    sizeOptions,
-    sort,
-    params,
-    nextPage,
     prevPage,
+    nextPage,
+    changePage,
   };
 }
 </script>

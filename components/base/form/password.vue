@@ -2,6 +2,7 @@
   <UInput
     v-model="model"
     :type="isShow ? 'text' : 'password'"
+    autocomplete
     :ui="{ icon: { trailing: { pointer: '', padding: '' } } }"
   >
     <template #trailing>
@@ -17,7 +18,10 @@
   </UInput>
 </template>
 
-<script setup>
-const model = defineModel();
+<script setup lang="ts">
+const model = defineModel({
+  default: "",
+});
+
 const isShow = ref(false);
 </script>

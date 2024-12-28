@@ -20,7 +20,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     baseURL: runtimeConf.public.apiUrl,
     onRequest({ request, options, error }) {
 
-      console.log(request);
       // if (session.value) {
       //   const headers = (options.headers ||= {});
       //   if (Array.isArray(headers)) {
