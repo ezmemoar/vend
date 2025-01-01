@@ -3,16 +3,18 @@ import { type ManipulateType } from "dayjs";
 import type { InferType, ISchema } from "yup";
 
 export type FormDatePicker = Date | null;
-export interface DateRangePicker {
+export interface FormDateRangePicker {
   start: FormDatePicker;
   end: FormDatePicker;
 }
+
 export type FormDateRangeType =
   | Date
   | {
       duration: number;
       unit: ManipulateType;
     };
+
 export interface FormDateRangeOptions {
   label: string;
   start?: FormDateRangeType;

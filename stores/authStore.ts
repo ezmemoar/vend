@@ -1,28 +1,26 @@
 export const useAuthStore = defineStore("auth", () => {
-  const credentials = useCookie<UserAuth | null>("auth");
+  const user = ref<User>();
 
-  const isAuthenticated = () => {
-    return (
-      credentials.value &&
-      !!credentials.value.access_token &&
-      new Date(credentials.value.expired_at) > new Date()
-    );
-  };
-  const setCredentials = (payload: UserAuth) => {
+  const refreshToken = useCookie("refresh_token", {
+    maxAge: 60 * 60 * 48,
+  });
+
+  const token = useCookie("token", {
+    maxAge: 60 * 60 * 24,
+  });
+
+  const isAuthenticated = () => token.value;
+
+  const setUser = (payload: User) => {
     const newPayload = { ...payload };
-
-    if (newPayload.expires_in) {
-      const d = new Date();
-      const milimeter = 1000;
-      newPayload.expired_at = new Date(
-        d.getTime() + newPayload.expires_in * milimeter
-      ).toString();
-    }
-
-    credentials.value = { ...credentials.value, ...newPayload };
+    user.value = { ...user.value, ...newPayload };
   };
 
-  const clearCredentials = () => (credentials.value = null);
+  const clearData = () => {
+    user.value = undefined;
+    refreshToken.value = undefined;
+    token.value = undefined;
+  };
 
-  return { credentials, isAuthenticated, setCredentials, clearCredentials };
+  return { user, refreshToken, token, isAuthenticated, setUser, clearData };
 });

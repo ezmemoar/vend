@@ -5,7 +5,7 @@ withDefaults(defineProps<{ range: boolean }>(), {
   range: false,
 });
 
-const model = defineModel<DateRangePicker | FormDatePicker>({
+const model = defineModel<FormDateRangePicker | FormDatePicker>({
   default: {
     start: null,
     end: null,
@@ -48,7 +48,7 @@ const displayText = computed(() => {
     return dayjs(model.value).format("DD MMM YYYY");
   }
 
-  const newD = model.value as DateRangePicker;
+  const newD = model.value as FormDateRangePicker;
   return !newD.start
     ? null
     : `${dayjs(newD.start).format("DD MMM YYYY")} - ${dayjs(newD.end).format(

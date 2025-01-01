@@ -1,3 +1,54 @@
+<script setup lang="ts">
+const props = defineProps<{
+  data: TableData[];
+  columns: TableColumn[];
+  loading: boolean;
+  ui: object;
+  count: number;
+  totalPage: number;
+}>();
+
+const route = useRoute();
+
+const { params, sizeOptions } = usePagination();
+
+const calculateRowNumber = (i: number) => startPage.value + i;
+
+const columnsKey = computed(() => props.columns.map((val) => val.key));
+
+const startPage = computed(
+    () => 1 + params.value.page_size * (params.value.page - 1)
+);
+
+const endPage = computed(() => {
+  const total = params.value.page_size * params.value.page;
+  return props.count && total > props.count ? props.count : total;
+});
+
+const changePage = () =>
+  navigateTo({
+    query: { ...(route.query ?? {}), ...params.value },
+  });
+
+const nextPage = () => {
+  params.value.page++;
+  changePage();
+};
+
+const prevPage = () => {
+  params.value.page--;
+  changePage();
+};
+
+watch(
+  () => params.value.page_size,
+  () => {
+    params.value.page = 1;
+    changePage();
+  }
+);
+</script>
+
 <template>
   <div
     class="rounded shadow border border-slate-200 dark:border-slate-800 pb-3"
@@ -54,83 +105,3 @@
   </div>
 </template>
 
-<script setup lang="ts">
-const props = defineProps<{
-  data: TableData[];
-  columns: TableColumn[];
-  loading: boolean;
-  ui: object;
-  count: number;
-  totalPage: number;
-}>();
-
-const route = useRoute();
-
-const { params, sizeOptions } = useLocalPagination();
-const {
-  columnsKey,
-  calculateRowNumber,
-  startPage,
-  endPage,
-  prevPage,
-  nextPage,
-  changePage,
-} = useLocalTable();
-
-watch(
-  () => params.value.page_size,
-  () => {
-    params.value.page = 1;
-    changePage();
-  }
-);
-
-function useLocalPagination() {
-  const sizeOptions = [10, 15, 30, 50, 100];
-  const params = ref({
-    page: route.query?.page ? +route.query.page : 1,
-    page_size: route.query?.page_size ? +route.query.page_size : 15,
-    sort: route.query?.sort ? route.query.sort : "",
-  });
-
-  return { params, sizeOptions };
-}
-
-function useLocalTable() {
-  const columnsKey = computed(() => props.columns.map((val) => val.key));
-  const startPage = computed(
-    () => 1 + params.value.page_size * (params.value.page - 1)
-  );
-  const endPage = computed(() => {
-    const total = params.value.page_size * params.value.page;
-    return props.count && total > props.count ? props.count : total;
-  });
-
-  const calculateRowNumber = (i: number) => startPage.value + i;
-
-  const changePage = () =>
-    navigateTo({
-      query: { ...(route.query ?? {}), ...params.value },
-    });
-
-  const nextPage = () => {
-    params.value.page++;
-    changePage();
-  };
-
-  const prevPage = () => {
-    params.value.page--;
-    changePage();
-  };
-
-  return {
-    columnsKey,
-    calculateRowNumber,
-    startPage,
-    endPage,
-    prevPage,
-    nextPage,
-    changePage,
-  };
-}
-</script>

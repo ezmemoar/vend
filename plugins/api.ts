@@ -1,39 +1,55 @@
-const createHeadersPayload = (headers: HeadersInit, val: any) => {
+const createHeadersPayload = (
+  headers: HeadersInit,
+  val: { [index: string]: any }
+) => {
   const keys = Object.keys(val);
 
   keys.forEach((v) => {
     if (Array.isArray(headers)) {
-      headers.push([v, `Bearer ${val[v]}`]);
+      headers.push([v, val[v]]);
     } else if (headers instanceof Headers) {
-      headers.set(v, `Bearer ${val[v]}`);
+      headers.set(v, val[v]);
     } else {
-      headers[v] = `Bearer ${val[v]}`;
+      headers[v] = val[v];
     }
-  })
-
+  });
 };
 
 export default defineNuxtPlugin((nuxtApp) => {
+  const store = useAuthStore();
+  const toast = useToast();
   const runtimeConf = useRuntimeConfig();
 
   const api = $fetch.create({
     baseURL: runtimeConf.public.apiUrl,
     onRequest({ request, options, error }) {
+      const headers = (options.headers ||= {});
+      const newHeaders: { [index: string]: any } = {};
 
-      // if (session.value) {
-      //   const headers = (options.headers ||= {});
-      //   if (Array.isArray(headers)) {
-      //     headers.push(["Authorization", `Bearer ${session.value?.token}`]);
-      //   } else if (headers instanceof Headers) {
-      //     headers.set("Authorization", `Bearer ${session.value?.token}`);
-      //   } else {
-      //     headers.Authorization = `Bearer ${session.value?.token}`;
-      //   }
-      // }
+      if (store.token) {
+        newHeaders["Authorization"] = `Bearer ${store.token}`;
+      }
+
+      createHeadersPayload(headers, newHeaders);
     },
-    async onResponseError({ response }) {
+    onRequestError({ error }) {
+      toast.add({
+        title: error?.message,
+        color: "danger",
+        icon: "i-heroicons-exclamation-circle",
+      });
+
+      throw error;
+    },
+    async onResponseError({ response, error }) {
+      toast.add({
+        title: response._data?.errors[0]?.detail || error?.message,
+        color: "danger",
+        icon: "i-heroicons-exclamation-circle",
+      });
+
       if (response.status === 401) {
-        await nuxtApp.runWithContext(() => navigateTo("/login"));
+        await nuxtApp.runWithContext(() => navigateTo("/"));
       }
     },
   });

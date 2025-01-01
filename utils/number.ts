@@ -1,7 +1,7 @@
+export const filterNumberOnly = (num: number) => `${num}`.replace(/\D/g, "");
+
 export const formatNumber = (num: number, config: Intl.NumberFormatOptions) =>
   Intl.NumberFormat("id-ID", config).format(num);
-
-export const filterNumberOnly = (num: number) => `${num}`.replace(/\D/g, "");
 
 export const formatCurrency = (num: number, config: Intl.NumberFormatOptions) =>
   Intl.NumberFormat("id-ID", {

@@ -51,22 +51,18 @@ useSeoMeta({
   title: "Login",
 });
 
-let d = ref();
-
 const authStore = useAuthStore();
 const toast = useToast();
 
 const { state, schema, run } = postLogin();
-const { data, status, execute } = useAsyncData(() => run(), {
-  immediate: false,
-});
+const { data, status, execute } = run();
 
 const handleSubmit = async () => {
   await execute();
 
   if (!data.value) return toast.add({ title: "Credential tidak ditemukan" });
 
-  authStore.setCredentials(data.value);
+  authStore.token = data.value;
   navigateTo("/dashboard/pilkada");
 };
 </script>

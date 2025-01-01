@@ -1,3 +1,4 @@
+import type { UseFetchOptions } from "#app";
 import { object, string } from "yup";
 
 export const postLogin = () => {
@@ -11,10 +12,11 @@ export const postLogin = () => {
     password: string().required("Password tidak boleh kosong"),
   });
 
-  const run = (options: FetchOptions = { method: "POST" }) =>
-    useNuxtApp().$api<UserAuth>("/login", options);
+  const run = (options?: UseFetchOptions<string>) =>
+    useMutation<string>("/login", {
+      body: state,
+      ...options,
+    });
 
   return { state, schema, run };
 };
-
-const asd = postLogin();
